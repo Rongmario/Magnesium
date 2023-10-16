@@ -1,93 +1,98 @@
-plugins {
-	id 'dev.architectury.loom' version '0.10.0-SNAPSHOT'
-	id 'maven-publish'
-}
-
-loom {
-	silentMojangMappingsLicense()
-	forge {
-		mixinConfigs = [
-				"rubidium.mixins.json",
-				"rubidium.compat.mixins.json"
-		]
+buildscript {
+	repositories {
+		maven { url = 'https://maven.minecraftforge.net/' }
+		maven { url = 'https://repo.spongepowered.org/maven' }
+		mavenCentral()
 	}
-	mixin.defaultRefmapName = "rubidium-mixins-refmap.json"
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
+		classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+	}
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
 
-archivesBaseName = "${project.archives_base_name}-mc${project.minecraft_version}"
-version = project.mod_version
-group = project.maven_group
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+version = '1.0'
+group = 'com.github.singlerr'
+archivesBaseName = 'strontium'
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+minecraft {
+
+	mappings channel: 'stable', version: '39-1.12'
+
+	accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+	runs {
+		client {
+			workingDirectory project.file('run')
+
+			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+			property 'forge.logging.console.level', 'debug'
+			arg '-torg.spongepowered.asm.launch.MixinTweaker'
+		}
+
+		server {
+
+			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+			property 'forge.logging.console.level', 'debug'
+		}
+	}
+}
 
 repositories {
-	maven {
-		name = "CTM"
-		url "https://maven.tterrag.com/"
-		content {
-			includeGroup "team.chisel.ctm"
-		}
-	}
-	maven {
-		name = "CurseForge"
-		url "https://cursemaven.com"
-		content {
-			includeGroup "curse.maven"
-		}
-	}
-	maven {
-		name = "Modrinth"
-		url = "https://api.modrinth.com/maven"
-		content {
-			includeGroup "maven.modrinth"
-		}
-	}
+	maven { url = 'https://repo.spongepowered.org/maven' }
+}
+
+configurations {
+	embed
+	implementation.extendsFrom(embed)
+}
+
+mixin {
+	add sourceSets.main, 'rubidium.refmap.json'
+	config 'rubidium.mixins.json'
+	config 'rubidium.compat.mixins.json'
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+	minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
-	modCompileOnly "curse.maven:flywheel-486392:3535459"
-	modCompileOnly "curse.maven:codechickenlib-242818:3681973"
-	modCompileOnly "team.chisel.ctm:CTM:MC1.16.1-1.1.2.6"
-}
+	implementation 'org.slf4j:slf4j-api:1.7.25'
 
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("META-INF/mods.toml") {
-		expand "version": project.version
+	annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
+	embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+		exclude module: 'guava'
+		exclude module: 'commons-io'
+		exclude module: 'gson'
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
-	it.options.encoding = "UTF-8"
-
-	def targetVersion = 8
-	if (JavaVersion.current().isJava9Compatible()) {
-		it.options.release = targetVersion
+jar {
+	from {
+		configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
+	} {
+		exclude "LICENSE.txt", "META-INF/MANIFSET.MF", "META-INF/maven/**", "META-INF/*.RSA", "META-INF/*.SF"
+	}
+	manifest {
+		attributes([
+				"Specification-Title": "Strontium",
+				"Specification-Vendor": "singlerr",
+				"Specification-Version": "1",
+				"Implementation-Title": project.name,
+				"Implementation-Version": "${version}",
+				"Implementation-Vendor" :"singlerr",
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
 	}
 }
 
-java {
-	withSourcesJar()
-}
+jar.finalizedBy('reobfJar')
 
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
-
-	repositories {
-	}
-}
