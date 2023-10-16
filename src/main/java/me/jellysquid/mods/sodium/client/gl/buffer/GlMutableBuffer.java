@@ -13,11 +13,11 @@ public class GlMutableBuffer extends GlBuffer {
         super(owner, usage);
     }
 
-    public void setSize(long size) {
-        this.size = size;
-    }
-
     public long getSize() {
         return this.size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 }

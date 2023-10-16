@@ -48,6 +48,7 @@ minecraft {
 }
 
 repositories {
+	mavenCentral()
 	maven { url = 'https://repo.spongepowered.org/maven' }
 }
 
@@ -67,6 +68,9 @@ dependencies {
 
 	implementation 'org.slf4j:slf4j-api:1.7.25'
 
+	implementation 'org.lwjgl:lwjgl:3.2.2'
+
+	implementation 'org.jetbrains:annotations:24.0.1'
 	annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
 	embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
 		exclude module: 'guava'

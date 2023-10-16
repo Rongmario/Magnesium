@@ -4,8 +4,7 @@ import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeBinding;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBufferTarget;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.func.GlFunctions;
-
-import com.mojang.blaze3d.platform.GlStateManager;
+import me.jellysquid.mods.sodium.compat.client.renderer.CompatGlStateManager;
 
 public abstract class GlAbstractTessellation implements GlTessellation {
     protected final GlPrimitiveType primitiveType;
@@ -23,12 +22,12 @@ public abstract class GlAbstractTessellation implements GlTessellation {
 
     protected void bindAttributes(CommandList commandList) {
         for (TessellationBinding binding : this.bindings) {
-            commandList.bindBuffer(GlBufferTarget.ARRAY_BUFFER,  binding.getBuffer());
+            commandList.bindBuffer(GlBufferTarget.ARRAY_BUFFER, binding.getBuffer());
 
             for (GlVertexAttributeBinding attrib : binding.getAttributeBindings()) {
-            	GlStateManager.vertexAttribPointer(attrib.getIndex(), attrib.getCount(), attrib.getFormat(), attrib.isNormalized(),
+                CompatGlStateManager.vertexAttribPointer(attrib.getIndex(), attrib.getCount(), attrib.getFormat(), attrib.isNormalized(),
                         attrib.getStride(), attrib.getPointer());
-            	GlStateManager.enableVertexAttribArray(attrib.getIndex());
+                CompatGlStateManager.enableVertexAttribArray(attrib.getIndex());
 
                 if (binding.isInstanced()) {
                     GlFunctions.INSTANCED_ARRAY.glVertexAttribDivisor(attrib.getIndex(), 1);

@@ -9,10 +9,6 @@ public class ShaderConstants {
         this.defines = defines;
     }
 
-    public List<String> getDefineStrings() {
-        return this.defines;
-    }
-
     public static ShaderConstants fromStringList(List<String> defines) {
         ShaderConstants.Builder builder = new ShaderConstants.Builder();
 
@@ -25,6 +21,10 @@ public class ShaderConstants {
 
     public static ShaderConstants.Builder builder() {
         return new Builder();
+    }
+
+    public List<String> getDefineStrings() {
+        return this.defines;
     }
 
     public static class Builder {

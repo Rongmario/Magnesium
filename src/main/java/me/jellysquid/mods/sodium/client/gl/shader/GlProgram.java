@@ -2,12 +2,11 @@ package me.jellysquid.mods.sodium.client.gl.shader;
 
 import me.jellysquid.mods.sodium.client.gl.GlObject;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
-import net.minecraft.util.Identifier;
+import me.jellysquid.mods.sodium.compat.client.renderer.CompatGlStateManager;
+import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL20C;
+import me.jellysquid.mods.sodium.compat.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL20C;
-
-import com.mojang.blaze3d.platform.GlStateManager;
 
 /**
  * An OpenGL shader program.
@@ -29,11 +28,11 @@ public abstract class GlProgram extends GlObject {
     }
 
     public void bind() {
-    	GlStateManager.useProgram(this.handle());
+        CompatGlStateManager.useProgram(this.handle());
     }
 
     public void unbind() {
-    	GlStateManager.useProgram(0);
+        CompatGlStateManager.useProgram(0);
     }
 
     public Identifier getName() {
@@ -42,12 +41,13 @@ public abstract class GlProgram extends GlObject {
 
     /**
      * Retrieves the index of the uniform with the given name.
+     *
      * @param name The name of the uniform to find the index of
      * @return The uniform's index
      * @throws NullPointerException If no uniform exists with the given name
      */
     public int getUniformLocation(String name) {
-        int index = GlStateManager.getUniformLocation(this.handle(), name);
+        int index = CompatGlStateManager.getUniformLocation(this.handle(), name);
 
         if (index < 0) {
             throw new NullPointerException("No uniform exists with name: " + name);
@@ -57,9 +57,13 @@ public abstract class GlProgram extends GlObject {
     }
 
     public void delete() {
-    	GlStateManager.deleteProgram(this.handle());
+        CompatGlStateManager.deleteProgram(this.handle());
 
         this.invalidateHandle();
+    }
+
+    public interface ProgramFactory<P extends GlProgram> {
+        P create(Identifier name, int handle);
     }
 
     public static class Builder {
@@ -68,11 +72,11 @@ public abstract class GlProgram extends GlObject {
 
         public Builder(Identifier name) {
             this.name = name;
-            this.program = GlStateManager.createProgram();
+            this.program = CompatGlStateManager.createProgram();
         }
 
         public Builder attachShader(GlShader shader) {
-        	GlStateManager.attachShader(this.program, shader.handle());
+            CompatGlStateManager.attachShader(this.program, shader.handle());
 
             return this;
         }
@@ -83,21 +87,21 @@ public abstract class GlProgram extends GlObject {
          * set.
          *
          * @param factory The factory which will create the shader program's container
-         * @param <P> The type which should be instantiated with the new program's handle
+         * @param <P>     The type which should be instantiated with the new program's handle
          * @return An instantiated shader container as provided by the factory
          */
         public <P extends GlProgram> P build(ProgramFactory<P> factory) {
-        	GlStateManager.linkProgram(this.program);
+            CompatGlStateManager.linkProgram(this.program);
 
-            String log = GL20C.glGetProgramInfoLog(this.program);
+            String log = CompatGL20C.glGetProgramInfoLog(this.program);
 
             if (!log.isEmpty()) {
                 LOGGER.warn("Program link log for " + this.name + ": " + log);
             }
 
-            int result = GlStateManager.getProgram(this.program, GL20C.GL_LINK_STATUS);
+            int result = CompatGlStateManager.getProgram(this.program, CompatGL20C.GL_LINK_STATUS);
 
-            if (result != GL20C.GL_TRUE) {
+            if (result != CompatGL20C.GL_TRUE) {
                 throw new RuntimeException("Shader program linking failed, see log for details");
             }
 
@@ -105,13 +109,9 @@ public abstract class GlProgram extends GlObject {
         }
 
         public Builder bindAttribute(String name, ShaderBindingPoint binding) {
-            GL20C.glBindAttribLocation(this.program, binding.getGenericAttributeIndex(), name);
+            CompatGL20C.glBindAttribLocation(this.program, binding.getGenericAttributeIndex(), name);
 
             return this;
         }
-    }
-
-    public interface ProgramFactory<P extends GlProgram> {
-        P create(Identifier name, int handle);
     }
 }

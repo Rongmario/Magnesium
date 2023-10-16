@@ -9,7 +9,7 @@ import java.nio.Buffer;
 /**
  * Contains versions of MemoryUtil#memFree that hopefully work on all versions of LWJGL 3 released
  * in the past few years.
- *
+ * <p>
  * LWJGL 3.2.3 made breaking changes to memFree, which is why this class is needed:
  * https://github.com/LWJGL/lwjgl3/releases/tag/3.2.3
  */

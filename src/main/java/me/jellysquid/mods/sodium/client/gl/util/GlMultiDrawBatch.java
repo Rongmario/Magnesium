@@ -57,7 +57,7 @@ public class GlMultiDrawBatch {
     }
 
     public void delete() {
-    	MemoryUtilHelper.memFree(this.bufIndices);
+        MemoryUtilHelper.memFree(this.bufIndices);
         MemoryUtilHelper.memFree(this.bufLen);
     }
 }

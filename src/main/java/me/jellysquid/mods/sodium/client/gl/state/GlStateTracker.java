@@ -3,9 +3,9 @@ package me.jellysquid.mods.sodium.client.gl.state;
 import me.jellysquid.mods.sodium.client.gl.array.GlVertexArray;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBuffer;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBufferTarget;
-import org.lwjgl.opengl.GL30C;
-
-import com.mojang.blaze3d.platform.GlStateManager;
+import me.jellysquid.mods.sodium.compat.client.renderer.CompatGlStateManager;
+import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL30C;
+import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL31C;
 
 import java.util.Arrays;
 
@@ -25,12 +25,12 @@ public class GlStateTracker {
     public boolean makeBufferActive(GlBufferTarget target, GlBuffer buffer) {
         return this.makeBufferActive(target, buffer == null ? GlBuffer.NULL_BUFFER_ID : buffer.handle());
     }
-    
+
     private boolean makeBufferActive(GlBufferTarget target, int buffer) {
         int prevBuffer = this.bufferState[target.ordinal()];
-        
+
         if (prevBuffer == UNASSIGNED_HANDLE) {
-            this.bufferRestoreState[target.ordinal()] = GlStateManager.getInteger(target.getBindingParameter());
+            this.bufferRestoreState[target.ordinal()] = CompatGlStateManager.getInteger(target.getBindingParameter());
         }
 
         this.bufferState[target.ordinal()] = buffer;
@@ -46,7 +46,7 @@ public class GlStateTracker {
         int prevArray = this.vertexArrayState;
 
         if (prevArray == UNASSIGNED_HANDLE) {
-            this.vertexArrayRestoreState = GlStateManager.getInteger(GL30C.GL_VERTEX_ARRAY_BINDING);
+            this.vertexArrayRestoreState = CompatGlStateManager.getInteger(CompatGL31C.GL_VERTEX_ARRAY_BINDING);
         }
 
         this.vertexArrayState = array;
@@ -58,13 +58,13 @@ public class GlStateTracker {
         for (int i = 0; i < GlBufferTarget.COUNT; i++) {
             if (this.bufferState[i] != this.bufferRestoreState[i] &&
                     this.bufferRestoreState[i] != UNASSIGNED_HANDLE) {
-            	GlStateManager.bindBuffers(GlBufferTarget.VALUES[i].getTargetParameter(), this.bufferRestoreState[i]);
+                CompatGlStateManager.bindBuffers(GlBufferTarget.VALUES[i].getTargetParameter(), this.bufferRestoreState[i]);
             }
         }
 
         if (this.vertexArrayState != this.vertexArrayRestoreState &&
                 this.vertexArrayRestoreState != UNASSIGNED_HANDLE) {
-            GL30C.glBindVertexArray(this.vertexArrayRestoreState);
+            CompatGL30C.glBindVertexArray(this.vertexArrayRestoreState);
         }
     }
 

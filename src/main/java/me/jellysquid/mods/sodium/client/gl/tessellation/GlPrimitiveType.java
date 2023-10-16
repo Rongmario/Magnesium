@@ -1,11 +1,11 @@
 package me.jellysquid.mods.sodium.client.gl.tessellation;
 
-import org.lwjgl.opengl.GL20C;
+import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL20C;
 
 public enum GlPrimitiveType {
-    LINES(GL20C.GL_LINES),
-    TRIANGLES(GL20C.GL_TRIANGLES),
-    QUADS(GL20C.GL_QUADS);
+    LINES(CompatGL20C.GL_LINES),
+    TRIANGLES(CompatGL20C.GL_TRIANGLES),
+    QUADS(CompatGL20C.GL_QUADS);
 
     private final int id;
 
