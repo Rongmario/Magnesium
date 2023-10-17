@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.model.quad;
 
-import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 import static me.jellysquid.mods.sodium.client.util.ModelQuadUtil.*;
 
@@ -12,7 +12,7 @@ public class ModelQuad implements ModelQuadViewMutable {
     private final int[] data = new int[VERTEX_SIZE * 4];
     private int flags;
 
-    private Sprite sprite;
+    private TextureAtlasSprite sprite;
     private int colorIdx;
 
     @Override
@@ -56,18 +56,8 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
-    public void setFlags(int flags) {
-        this.flags = flags;
-    }
-
-    @Override
-    public void setSprite(Sprite sprite) {
+    public void setSprite(TextureAtlasSprite sprite) {
         this.sprite = sprite;
-    }
-
-    @Override
-    public void setColorIndex(int index) {
-        this.colorIdx = index;
     }
 
     @Override
@@ -83,6 +73,11 @@ public class ModelQuad implements ModelQuadViewMutable {
     @Override
     public int getColorIndex() {
         return this.colorIdx;
+    }
+
+    @Override
+    public void setColorIndex(int index) {
+        this.colorIdx = index;
     }
 
     @Override
@@ -102,10 +97,9 @@ public class ModelQuad implements ModelQuadViewMutable {
 
     @Override
     public int getColor(int idx) {
-    	if(vertexOffset(idx) + COLOR_INDEX < data.length) {
+        if (vertexOffset(idx) + COLOR_INDEX < data.length) {
             return this.data[vertexOffset(idx) + COLOR_INDEX];
-        }
-        else {
+        } else {
             return data.length;
         }
     }
@@ -126,7 +120,12 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
-    public Sprite rubidium$getSprite() {
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    @Override
+    public TextureAtlasSprite rubidium$getSprite() {
         return this.sprite;
     }
 

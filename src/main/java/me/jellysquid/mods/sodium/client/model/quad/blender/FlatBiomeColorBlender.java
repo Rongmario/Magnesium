@@ -2,10 +2,10 @@ package me.jellysquid.mods.sodium.client.model.quad.blender;
 
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.IBlockAccess;
 
 import java.util.Arrays;
 
@@ -16,9 +16,10 @@ public class FlatBiomeColorBlender implements BiomeColorBlender {
     private final int[] cachedRet = new int[4];
 
     @Override
-    public int[] getColors(BlockColorProvider colorizer, BlockRenderView world, BlockState state, BlockPos origin,
+    public int[] getColors(IBlockColor colorizer, IBlockAccess world, IBlockState state, BlockPos origin,
                            ModelQuadView quad) {
-        Arrays.fill(this.cachedRet, ColorARGB.toABGR(colorizer.getColor(state, world, origin, quad.getColorIndex())));
+
+        Arrays.fill(this.cachedRet, ColorARGB.toABGR(colorizer.colorMultiplier(state, world, origin, quad.getColorIndex())));
 
         return this.cachedRet;
     }

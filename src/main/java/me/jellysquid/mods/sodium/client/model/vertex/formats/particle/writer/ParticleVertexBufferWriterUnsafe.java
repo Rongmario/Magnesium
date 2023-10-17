@@ -1,11 +1,10 @@
 package me.jellysquid.mods.sodium.client.model.vertex.formats.particle.writer;
 
-import org.lwjgl.system.MemoryUtil;
-
 import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterUnsafe;
 import me.jellysquid.mods.sodium.client.model.vertex.formats.particle.ParticleVertexSink;
+import org.lwjgl.system.MemoryUtil;
 
 public class ParticleVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe implements ParticleVertexSink {
     public ParticleVertexBufferWriterUnsafe(VertexBufferView backingBuffer) {

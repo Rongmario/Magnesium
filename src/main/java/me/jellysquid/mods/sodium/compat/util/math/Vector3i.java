@@ -104,7 +104,7 @@ public class Vector3i {
     }
 
     public Vector3i relative(Direction p_177967_1_, int p_177967_2_) {
-        return p_177967_2_ == 0 ? this : new Vector3i(this.getX() + p_177967_1_.getOffsetX() * p_177967_2_, this.getY() + p_177967_1_.getOffsetY() * p_177967_2_, this.getZ() + p_177967_1_.getOffsetZ() * p_177967_2_);
+        return p_177967_2_ == 0 ? this : new Vector3i(this.getX() + p_177967_1_.getStepX() * p_177967_2_, this.getY() + p_177967_1_.getStepY() * p_177967_2_, this.getZ() + p_177967_1_.getStepZ() * p_177967_2_);
     }
 
     public Vector3i cross(Vector3i p_177955_1_) {

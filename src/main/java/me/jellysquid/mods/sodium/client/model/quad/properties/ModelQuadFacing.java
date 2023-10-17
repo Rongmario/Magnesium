@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.model.quad.properties;
 
-import net.minecraft.util.math.Direction;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
 
 public enum ModelQuadFacing {
     UP,
@@ -32,7 +32,7 @@ public enum ModelQuadFacing {
                 return UNASSIGNED;
         }
     }
-    
+
     public ModelQuadFacing getOpposite() {
         switch (this) {
             case UP:

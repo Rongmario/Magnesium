@@ -1,13 +1,13 @@
 package me.jellysquid.mods.sodium.client.model.light.smooth;
 
-import net.minecraft.util.math.Direction;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
 
 /**
  * The neighbor information for each face of a block, used when performing smooth lighting in order to calculate
  * the occlusion of each corner.
  */
 enum AoNeighborInfo {
-    DOWN(new Direction[] { Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH }, 0.5F) {
+    DOWN(new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH}, 0.5F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = z;
@@ -37,7 +37,7 @@ enum AoNeighborInfo {
             return y;
         }
     },
-    UP(new Direction[] { Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH }, 1.0F) {
+    UP(new Direction[]{Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH}, 1.0F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = z;
@@ -67,7 +67,7 @@ enum AoNeighborInfo {
             return 1.0f - y;
         }
     },
-    NORTH(new Direction[] { Direction.UP, Direction.DOWN, Direction.EAST, Direction.WEST }, 0.8F) {
+    NORTH(new Direction[]{Direction.UP, Direction.DOWN, Direction.EAST, Direction.WEST}, 0.8F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = 1.0f - x;
@@ -97,7 +97,7 @@ enum AoNeighborInfo {
             return z;
         }
     },
-    SOUTH(new Direction[] { Direction.WEST, Direction.EAST, Direction.DOWN, Direction.UP }, 0.8F) {
+    SOUTH(new Direction[]{Direction.WEST, Direction.EAST, Direction.DOWN, Direction.UP}, 0.8F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = y;
@@ -127,7 +127,7 @@ enum AoNeighborInfo {
             return 1.0f - z;
         }
     },
-    WEST(new Direction[] { Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH }, 0.6F) {
+    WEST(new Direction[]{Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH}, 0.6F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = z;
@@ -157,7 +157,7 @@ enum AoNeighborInfo {
             return x;
         }
     },
-    EAST(new Direction[] { Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH }, 0.6F) {
+    EAST(new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH}, 0.6F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = z;
@@ -188,12 +188,12 @@ enum AoNeighborInfo {
         }
     };
 
+    private static final AoNeighborInfo[] VALUES = AoNeighborInfo.values();
     /**
      * The direction of each corner block from this face, which can be retrieved by offsetting the position of the origin
      * block by the direction vector.
      */
     public final Direction[] faces;
-
     /**
      * The constant brightness modifier for this face. This data exists to emulate the results of the OpenGL lighting
      * model which gives a faux directional light appearance to blocks in the game. Not currently used.
@@ -206,12 +206,19 @@ enum AoNeighborInfo {
     }
 
     /**
+     * @return Returns the {@link AoNeighborInfo} which corresponds with the specified direction
+     */
+    public static AoNeighborInfo get(Direction direction) {
+        return VALUES[direction.ordinal()];
+    }
+
+    /**
      * Calculates how much each corner contributes to the final "darkening" of the vertex at the specified position. The
      * weight is a function of the distance from the vertex's position to the corner block's position.
      *
-     * @param x The x-position of the vertex
-     * @param y The y-position of the vertex
-     * @param z The z-position of the vertex
+     * @param x   The x-position of the vertex
+     * @param y   The y-position of the vertex
+     * @param z   The z-position of the vertex
      * @param out The weight values for each corner
      */
     public abstract void calculateCornerWeights(float x, float y, float z, float[] out);
@@ -237,13 +244,4 @@ enum AoNeighborInfo {
      * @return The depth of the vertex into this face
      */
     public abstract float getDepth(float x, float y, float z);
-
-    private static final AoNeighborInfo[] VALUES = AoNeighborInfo.values();
-
-    /**
-     * @return Returns the {@link AoNeighborInfo} which corresponds with the specified direction
-     */
-    public static AoNeighborInfo get(Direction direction) {
-        return VALUES[direction.getId()];
-    }
 }

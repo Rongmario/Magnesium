@@ -11,9 +11,9 @@ public interface LineVertexSink extends VertexSink {
     /**
      * Writes a line vertex to the sink.
      *
-     * @param x The x-position of the vertex
-     * @param y The y-position of the vertex
-     * @param z The z-position of the vertex
+     * @param x     The x-position of the vertex
+     * @param y     The y-position of the vertex
+     * @param z     The z-position of the vertex
      * @param color The ABGR-packed color of the vertex
      */
     void vertexLine(float x, float y, float z, int color);

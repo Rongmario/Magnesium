@@ -5,10 +5,10 @@ import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.client.render.WorldRenderer;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
 
 import java.util.Arrays;
@@ -25,6 +25,25 @@ public class FlatLightPipeline implements LightPipeline {
 
     public FlatLightPipeline(LightDataAccess lightCache) {
         this.lightCache = lightCache;
+    }
+
+
+    /**
+     * When vanilla computes an offset lightmap with flat lighting, it passes the original BlockState but the
+     * offset BlockPos to {@link WorldRenderer#getLightmapCoordinates(BlockRenderView, BlockState, BlockPos)}.
+     * This does not make much sense but fixes certain issues, primarily dark quads on light-emitting blocks
+     * behind tinted glass. {@link LightDataAccess} cannot efficiently store lightmaps computed with
+     * inconsistent values so this method exists to mirror vanilla behavior as closely as possible.
+     */
+    private int getOffsetLightmap(BlockPos pos, Direction face) {
+        int lightmap = LightDataAccess.unpackLM(this.lightCache.get(pos, face));
+        // If the block light is not 15 (max)...
+        if ((lightmap & 0xF0) != 0xF0) {
+            int originLightmap = LightDataAccess.unpackLM(this.lightCache.get(pos));
+            // ...take the maximum combined block light at the origin and offset positions
+            lightmap = (lightmap & ~0xFF) | Math.max(lightmap & 0xFF, originLightmap & 0xFF);
+        }
+        return lightmap;
     }
 
     @Override
@@ -46,24 +65,6 @@ public class FlatLightPipeline implements LightPipeline {
         }
 
         Arrays.fill(out.lm, lightmap);
-        Arrays.fill(out.br, this.lightCache.getWorld().getBrightness(face, shade));
-    }
-
-    /**
-     * When vanilla computes an offset lightmap with flat lighting, it passes the original BlockState but the
-     * offset BlockPos to {@link WorldRenderer#getLightmapCoordinates(BlockRenderView, BlockState, BlockPos)}.
-     * This does not make much sense but fixes certain issues, primarily dark quads on light-emitting blocks
-     * behind tinted glass. {@link LightDataAccess} cannot efficiently store lightmaps computed with
-     * inconsistent values so this method exists to mirror vanilla behavior as closely as possible.
-     */
-    private int getOffsetLightmap(BlockPos pos, Direction face) {
-        int lightmap = LightDataAccess.unpackLM(this.lightCache.get(pos, face));
-        // If the block light is not 15 (max)...
-        if ((lightmap & 0xF0) != 0xF0) {
-            int originLightmap = LightDataAccess.unpackLM(this.lightCache.get(pos));
-            // ...take the maximum combined block light at the origin and offset positions
-            lightmap = (lightmap & ~0xFF) | Math.max(lightmap & 0xFF, originLightmap & 0xFF);
-        }
-        return lightmap;
+        Arrays.fill(out.br, this.lightCache.getWorld().getBlockState(pos).getLightOpacity());
     }
 }

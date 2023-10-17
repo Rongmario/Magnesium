@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.model.quad;
 
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
-import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 import java.nio.ByteBuffer;
 
@@ -61,7 +61,8 @@ public interface ModelQuadView {
 
     /**
      * Copies this quad's data into the specified buffer starting at the given position.
-     * @param buf The buffer to write this quad's data to
+     *
+     * @param buf      The buffer to write this quad's data to
      * @param position The starting byte index to write to
      */
     default void copyInto(ByteBuffer buf, int position) {
@@ -81,5 +82,5 @@ public interface ModelQuadView {
     /**
      * @return The sprite texture used by this quad, or null if none is attached
      */
-    Sprite rubidium$getSprite();
+    TextureAtlasSprite rubidium$getSprite();
 }

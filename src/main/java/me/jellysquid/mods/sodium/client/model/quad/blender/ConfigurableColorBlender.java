@@ -1,29 +1,29 @@
 package me.jellysquid.mods.sodium.client.model.quad.blender;
 
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.IBlockAccess;
 
 class ConfigurableColorBlender implements BiomeColorBlender {
     private final BiomeColorBlender defaultBlender;
     private final BiomeColorBlender smoothBlender;
 
-    public ConfigurableColorBlender(MinecraftClient client) {
+    public ConfigurableColorBlender(Minecraft client) {
         this.defaultBlender = new FlatBiomeColorBlender();
         this.smoothBlender = isSmoothBlendingEnabled(client) ? new SmoothBiomeColorBlender() : this.defaultBlender;
     }
 
-    private static boolean isSmoothBlendingEnabled(MinecraftClient client) {
-        return client.options.biomeBlendRadius > 0;
+    private static boolean isSmoothBlendingEnabled(Minecraft client) {
+        return true;
     }
 
     @Override
-    public int[] getColors(BlockColorProvider colorizer, BlockRenderView world, BlockState state, BlockPos origin,
-			ModelQuadView quad) {
-    	BiomeColorBlender blender;
+    public int[] getColors(IBlockColor colorizer, IBlockAccess world, IBlockState state, BlockPos origin,
+                           ModelQuadView quad) {
+        BiomeColorBlender blender;
 
         if (BlockColorSettings.isSmoothBlendingEnabled(world, state, origin)) {
             blender = this.smoothBlender;

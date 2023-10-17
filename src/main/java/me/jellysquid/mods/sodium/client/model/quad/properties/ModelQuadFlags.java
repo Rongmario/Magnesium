@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.model.quad.properties;
 
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.util.math.Direction;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 
 public class ModelQuadFlags {
     /**
@@ -34,7 +34,7 @@ public class ModelQuadFlags {
      */
     public static int getQuadFlags(BakedQuad bakedQuad) {
         ModelQuadView quad = (ModelQuadView) bakedQuad;
-        Direction face = bakedQuad.getFace();
+        Direction face = Direction.from(bakedQuad.getFace());
 
         float minX = 32.0F;
         float minY = 32.0F;
@@ -58,57 +58,57 @@ public class ModelQuadFlags {
         }
 
         boolean partial = false;
-        
+
         switch (face.getAxis()) {
-            case X : 
-            	partial = minY >= 0.0001f || minZ >= 0.0001f || maxY <= 0.9999F || maxZ <= 0.9999F;
-            	break;
-            case Y : 
-            	partial = minX >= 0.0001f || minZ >= 0.0001f || maxX <= 0.9999F || maxZ <= 0.9999F;
-            	break;
-            case Z : 
-            	partial = minX >= 0.0001f || minY >= 0.0001f || maxX <= 0.9999F || maxY <= 0.9999F;
-            	break;
-        };
+            case X:
+                partial = minY >= 0.0001f || minZ >= 0.0001f || maxY <= 0.9999F || maxZ <= 0.9999F;
+                break;
+            case Y:
+                partial = minX >= 0.0001f || minZ >= 0.0001f || maxX <= 0.9999F || maxZ <= 0.9999F;
+                break;
+            case Z:
+                partial = minX >= 0.0001f || minY >= 0.0001f || maxX <= 0.9999F || maxY <= 0.9999F;
+                break;
+        }
 
         boolean parallel = false;
-        
-        switch(face.getAxis()) {
-            case X :
-            	parallel = minX == maxX;
-            	break;
-            case Y :
-            	parallel = minY == maxY;
-            	break;
-            case Z :
-            	parallel = minZ == maxZ;
-            	break;
-        };
+
+        switch (face.getAxis()) {
+            case X:
+                parallel = minX == maxX;
+                break;
+            case Y:
+                parallel = minY == maxY;
+                break;
+            case Z:
+                parallel = minZ == maxZ;
+                break;
+        }
 
         boolean aligned = false;
         boolean flag = false;
-        
+
         switch (face) {
-            case DOWN :
-            	flag = minY < 0.0001f;
-            	break;
-            case UP :
-            	flag = maxY > 0.9999F;
-            	break;
-            case NORTH :
-            	flag = minZ < 0.0001f;
-            	break;
-            case SOUTH :
-            	flag = maxZ > 0.9999F;
-            	break;
-            case WEST :
-            	flag = minX < 0.0001f;
-            	break;
-            case EAST :
-            	flag = maxX > 0.9999F;
-            	break;
-        };
-        
+            case DOWN:
+                flag = minY < 0.0001f;
+                break;
+            case UP:
+                flag = maxY > 0.9999F;
+                break;
+            case NORTH:
+                flag = minZ < 0.0001f;
+                break;
+            case SOUTH:
+                flag = maxZ > 0.9999F;
+                break;
+            case WEST:
+                flag = minX < 0.0001f;
+                break;
+            case EAST:
+                flag = maxX > 0.9999F;
+                break;
+        }
+
         aligned = parallel && flag;
 
         int flags = 0;

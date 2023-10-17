@@ -29,12 +29,12 @@ public interface GlyphVertexSink extends VertexSink {
     /**
      * Writes a glyph vertex to the sink.
      *
-     * @param x The x-position of the vertex
-     * @param y The y-position of the vertex
-     * @param z The z-position of the vertex
+     * @param x     The x-position of the vertex
+     * @param y     The y-position of the vertex
+     * @param z     The z-position of the vertex
      * @param color The ABGR-packed color of the vertex
-     * @param u The u-texture of the vertex
-     * @param v The v-texture of the vertex
+     * @param u     The u-texture of the vertex
+     * @param v     The v-texture of the vertex
      * @param light The packed light map texture coordinates of the vertex
      */
     void writeGlyph(float x, float y, float z, int color, float u, float v, int light);

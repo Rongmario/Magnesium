@@ -1,10 +1,19 @@
 package me.jellysquid.mods.sodium.client.model.quad.blender;
 
-import net.minecraft.state.State;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.IBlockAccess;
 
 public interface BlockColorSettings<T> {
+    @SuppressWarnings("unchecked")
+    static <T> boolean isSmoothBlendingEnabled(IBlockAccess world, IBlockState state, BlockPos pos) {
+        if (state instanceof BlockColorSettings) {
+            BlockColorSettings<IBlockState> settings = (BlockColorSettings<IBlockState>) state;
+            return settings.useSmoothColorBlending(world, state, pos);
+        }
+        return false;
+    }
+
     /**
      * Configures whether biome colors from a color provider will be interpolated for this block. You should only
      * enable this functionality if your color provider returns values based upon a pair of coordinates in the world,
@@ -12,15 +21,5 @@ public interface BlockColorSettings<T> {
      *
      * @return True if interpolation should be used, otherwise false.
      */
-    boolean useSmoothColorBlending(BlockRenderView view, T state, BlockPos pos);
-
-    @SuppressWarnings("unchecked")
-    static <T> boolean isSmoothBlendingEnabled(BlockRenderView world, State<T, ?> state, BlockPos pos) {
-        if (state.owner instanceof BlockColorSettings) {
-        	BlockColorSettings<State<T, ?>> settings = (BlockColorSettings<State<T, ?>>) state.owner;
-            return settings.useSmoothColorBlending(world, state, pos);
-        }
-
-        return false;
-    }
+    boolean useSmoothColorBlending(IBlockAccess view, T state, BlockPos pos);
 }

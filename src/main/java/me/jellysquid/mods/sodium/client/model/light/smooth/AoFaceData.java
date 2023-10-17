@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.model.light.smooth;
 
 import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 import static me.jellysquid.mods.sodium.client.model.light.cache.ArrayLightDataCache.*;
 
@@ -15,6 +15,50 @@ class AoFaceData {
 
     private int flags;
 
+    private static float weightedSum(float[] v, float[] w) {
+        float t0 = v[0] * w[0];
+        float t1 = v[1] * w[1];
+        float t2 = v[2] * w[2];
+        float t3 = v[3] * w[3];
+
+        return t0 + t1 + t2 + t3;
+    }
+
+    private static float unpackSkyLight(int i) {
+        return (i >> 16) & 0xFF;
+    }
+
+    private static float unpackBlockLight(int i) {
+        return i & 0xFF;
+    }
+
+    private static int calculateCornerBrightness(int a, int b, int c, int d) {
+        // FIX: Normalize corner vectors correctly to the minimum non-zero value between each one to prevent
+        // strange issues
+        if ((a == 0) || (b == 0) || (c == 0) || (d == 0)) {
+            // Find the minimum value between all corners
+            final int min = minNonZero(minNonZero(a, b), minNonZero(c, d));
+
+            // Normalize the corner values
+            a = Math.max(a, min);
+            b = Math.max(b, min);
+            c = Math.max(c, min);
+            d = Math.max(d, min);
+        }
+
+        return ((a + b + c + d) >> 2) & 0xFF00FF;
+    }
+
+    private static int minNonZero(int a, int b) {
+        if (a == 0) {
+            return b;
+        } else if (b == 0) {
+            return a;
+        }
+
+        return Math.min(a, b);
+    }
+
     public void initLightData(LightDataAccess cache, BlockPos pos, Direction direction, boolean offset) {
         final int x = pos.getX();
         final int y = pos.getY();
@@ -25,9 +69,9 @@ class AoFaceData {
         final int adjZ;
 
         if (offset) {
-            adjX = x + direction.getOffsetX();
-            adjY = y + direction.getOffsetY();
-            adjZ = z + direction.getOffsetZ();
+            adjX = x + direction.getStepX();
+            adjY = y + direction.getStepY();
+            adjZ = z + direction.getStepZ();
         } else {
             adjX = x;
             adjY = y;
@@ -164,50 +208,6 @@ class AoFaceData {
 
     public float getBlendedShade(float[] w) {
         return weightedSum(this.ao, w);
-    }
-
-    private static float weightedSum(float[] v, float[] w) {
-        float t0 = v[0] * w[0];
-        float t1 = v[1] * w[1];
-        float t2 = v[2] * w[2];
-        float t3 = v[3] * w[3];
-
-        return t0 + t1 + t2 + t3;
-    }
-
-    private static float unpackSkyLight(int i) {
-        return (i >> 16) & 0xFF;
-    }
-
-    private static float unpackBlockLight(int i) {
-        return i & 0xFF;
-    }
-
-    private static int calculateCornerBrightness(int a, int b, int c, int d) {
-        // FIX: Normalize corner vectors correctly to the minimum non-zero value between each one to prevent
-        // strange issues
-        if ((a == 0) || (b == 0) || (c == 0) || (d == 0)) {
-            // Find the minimum value between all corners
-            final int min = minNonZero(minNonZero(a, b), minNonZero(c, d));
-
-            // Normalize the corner values
-            a = Math.max(a, min);
-            b = Math.max(b, min);
-            c = Math.max(c, min);
-            d = Math.max(d, min);
-        }
-
-        return ((a + b + c + d) >> 2) & 0xFF00FF;
-    }
-
-    private static int minNonZero(int a, int b) {
-        if (a == 0) {
-            return b;
-        } else if (b == 0) {
-            return a;
-        }
-
-        return Math.min(a, b);
     }
 
     public boolean hasLightData() {
