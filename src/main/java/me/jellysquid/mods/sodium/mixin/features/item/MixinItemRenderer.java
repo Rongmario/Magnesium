@@ -11,12 +11,22 @@ import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
 import net.minecraft.client.color.item.ItemColorProvider;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.client.renderer.color.ItemColors;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
@@ -27,35 +37,39 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 
-@Mixin(ItemRenderer.class)
+@Mixin(RenderItem.class)
 public class MixinItemRenderer {
     private final XoRoShiRoRandom random = new XoRoShiRoRandom();
 
     @Shadow
     @Final
-    private ItemColors colorMap;
+    private ItemColors itemColors;
 
     /**
      * @reason Avoid allocations
      * @author JellySquid
      */
     @Overwrite
-    public void renderBakedItemModel(BakedModel model, ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumer vertices) {
+    public void renderModel(IBakedModel model, int color, ItemStack stack) {
         XoRoShiRoRandom random = this.random;
-
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.ITEM);
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
-            List<BakedQuad> quads = model.getQuads(null, direction, random.setSeedAndReturn(42L));
+            List<BakedQuad> quads = model.getQuads(null, direction.to(), random.setSeedAndReturn(42L).nextLong());
 
             if (!quads.isEmpty()) {
-                this.renderBakedItemQuads(matrices, vertices, quads, stack, light, overlay);
+                this.renderQuads(bufferbuilder, quads, color, stack);
             }
         }
 
-        List<BakedQuad> quads = model.getQuads(null, null, random.setSeedAndReturn(42L));
+        List<BakedQuad> quads = model.getQuads(null, null, random.setSeedAndReturn(42L).nextLong());
 
         if (!quads.isEmpty()) {
-            this.renderBakedItemQuads(matrices, vertices, quads, stack, light, overlay);
+            this.renderQuads(bufferbuilder, quads, color, stack);
         }
+
+        tessellator.draw();
     }
 
     /**
@@ -63,25 +77,24 @@ public class MixinItemRenderer {
      * @author JellySquid
      */
     @Overwrite
-    public void renderBakedItemQuads(MatrixStack matrices, VertexConsumer vertexConsumer, List<BakedQuad> quads, ItemStack stack, int light, int overlay) {
-        MatrixStack.Entry entry = matrices.peek();
+    public void renderQuads(BufferBuilder renderer, List<BakedQuad> quads, int c, ItemStack stack) {
 
-        ItemColorProvider colorProvider = null;
+        IItemColor colorProvider = null;
 
-        QuadVertexSink drain = VertexDrain.of(vertexConsumer)
+        QuadVertexSink drain = VertexDrain.of(renderer)
                 .createSink(VanillaVertexTypes.QUADS);
         drain.ensureCapacity(quads.size() * 4);
 
         for (BakedQuad bakedQuad : quads) {
             int color = 0xFFFFFFFF;
 
-            if (!stack.isEmpty() && bakedQuad.hasColor()) {
+            if (!stack.isEmpty() && bakedQuad.hasTintIndex()) {
                 if (colorProvider == null) {
-                    colorProvider = ((ItemColorsExtended) this.colorMap).getColorProvider(stack);
+                    colorProvider = ((ItemColorsExtended) this.itemColors).getColorProvider(stack);
                 }
 
-                color = ColorARGB.toABGR(colorProvider != null ? colorProvider.getColor(stack, bakedQuad.getColorIndex()) :
-                        this.colorMap.getColorMultiplier(stack, bakedQuad.getColorIndex()), 255);
+                color = ColorARGB.toABGR(colorProvider != null ? colorProvider.colorMultiplier(stack, bakedQuad.getTintIndex()) :
+                        this.itemColors.colorMultiplier(stack, bakedQuad.getTintIndex()), 255);
             }
 
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
@@ -89,8 +102,8 @@ public class MixinItemRenderer {
             for (int i = 0; i < 4; i++) {
                 int fColor = multABGRInts(quad.getColor(i), color);
 
-                drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
-                        light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
+                drain.writeQuad(quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
+                        1, 1, ModelQuadUtil.getFacingNormal(Direction.from(bakedQuad.getFace())));
             }
 
             SpriteUtil.markSpriteActive(quad.rubidium$getSprite());
