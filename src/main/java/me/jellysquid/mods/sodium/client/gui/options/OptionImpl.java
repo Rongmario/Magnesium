@@ -4,8 +4,8 @@ import me.jellysquid.mods.sodium.client.gui.options.binding.GenericBinding;
 import me.jellysquid.mods.sodium.client.gui.options.binding.OptionBinding;
 import me.jellysquid.mods.sodium.client.gui.options.control.Control;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
@@ -22,19 +22,17 @@ public class OptionImpl<S, T> implements Option<T> {
 
     private final EnumSet<OptionFlag> flags;
 
-    private final Text name;
-    private final Text tooltip;
+    private final ITextComponent name;
+    private final ITextComponent tooltip;
 
     private final OptionImpact impact;
-
+    private final boolean enabled;
     private T value;
     private T modifiedValue;
 
-    private final boolean enabled;
-
     private OptionImpl(OptionStorage<S> storage,
-                       Text name,
-                       Text tooltip,
+                       ITextComponent name,
+                       ITextComponent tooltip,
                        OptionBinding<S, T> binding,
                        Function<OptionImpl<S, T>, Control<T>> control,
                        EnumSet<OptionFlag> flags,
@@ -52,18 +50,22 @@ public class OptionImpl<S, T> implements Option<T> {
         this.reset();
     }
 
+    public static <S, T> OptionImpl.Builder<S, T> createBuilder(Class<T> type, OptionStorage<S> storage) {
+        return new Builder<>(storage);
+    }
+
     @Override
-    public Text getNewName() {
+    public ITextComponent getNewName() {
         return this.name;
     }
 
     @Override
     public String getName() {
-        return this.getNewName().getString();
+        return this.getNewName().getFormattedText();
     }
 
     @Override
-    public Text getTooltip() {
+    public ITextComponent getTooltip() {
         return this.tooltip;
     }
 
@@ -119,25 +121,21 @@ public class OptionImpl<S, T> implements Option<T> {
         return this.flags;
     }
 
-    public static <S, T> OptionImpl.Builder<S, T> createBuilder(Class<T> type, OptionStorage<S> storage) {
-        return new Builder<>(storage);
-    }
-
     public static class Builder<S, T> {
         private final OptionStorage<S> storage;
-        private Text name;
-        private Text tooltip;
+        private final EnumSet<OptionFlag> flags = EnumSet.noneOf(OptionFlag.class);
+        private ITextComponent name;
+        private ITextComponent tooltip;
         private OptionBinding<S, T> binding;
         private Function<OptionImpl<S, T>, Control<T>> control;
         private OptionImpact impact;
-        private final EnumSet<OptionFlag> flags = EnumSet.noneOf(OptionFlag.class);
         private boolean enabled = true;
 
         private Builder(OptionStorage<S> storage) {
             this.storage = storage;
         }
 
-        public Builder<S, T> setName(Text name) {
+        public Builder<S, T> setName(ITextComponent name) {
             Validate.notNull(name, "Argument must not be null");
 
             this.name = name;
@@ -146,10 +144,10 @@ public class OptionImpl<S, T> implements Option<T> {
         }
 
         public Builder<S, T> setName(String name) {
-            return setName(new LiteralText(name));
+            return setName(new TextComponentString(name));
         }
 
-        public Builder<S, T> setTooltip(Text tooltip) {
+        public Builder<S, T> setTooltip(ITextComponent tooltip) {
             Validate.notNull(tooltip, "Argument must not be null");
 
             this.tooltip = tooltip;
@@ -158,7 +156,7 @@ public class OptionImpl<S, T> implements Option<T> {
         }
 
         public Builder<S, T> setTooltip(String tooltip) {
-            return setTooltip(new LiteralText(tooltip));
+            return setTooltip(new TextComponentString(tooltip));
         }
 
         public Builder<S, T> setBinding(BiConsumer<S, T> setter, Function<S, T> getter) {

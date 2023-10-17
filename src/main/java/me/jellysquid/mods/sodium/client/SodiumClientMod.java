@@ -1,22 +1,14 @@
 package me.jellysquid.mods.sodium.client;
 
-import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
-import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import net.minecraftforge.fml.ExtensionPoint;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
+
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(SodiumClientMod.MODID)
+@Mod(modid = SodiumClientMod.MODID)
 public class SodiumClientMod {
     public static final String MODID = "rubidium";
 

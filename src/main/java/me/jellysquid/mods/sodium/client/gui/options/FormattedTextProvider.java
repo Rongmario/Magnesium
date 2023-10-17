@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.gui.options;
 
-import net.minecraft.text.Text;
+import net.minecraft.util.text.ITextComponent;
 
 public interface FormattedTextProvider {
-    Text getLocalizedName();
+    ITextComponent getLocalizedName();
 }

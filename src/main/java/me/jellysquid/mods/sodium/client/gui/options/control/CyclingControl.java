@@ -4,15 +4,14 @@ import me.jellysquid.mods.sodium.client.gui.options.FormattedTextProvider;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import org.apache.commons.lang3.Validate;
 
 public class CyclingControl<T extends Enum<T>> implements Control<T> {
     private final Option<T> option;
     private final T[] allowedValues;
-    private final Text[] names;
+    private final ITextComponent[] names;
 
     public CyclingControl(Option<T> option, Class<T> enumType) {
         this(option, enumType, enumType.getEnumConstants());
@@ -22,7 +21,7 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
         this(option, enumType, toText(names));
     }
 
-    public CyclingControl(Option<T> option, Class<T> enumType, Text[] names) {
+    public CyclingControl(Option<T> option, Class<T> enumType, ITextComponent[] names) {
         T[] universe = enumType.getEnumConstants();
 
         Validate.isTrue(universe.length == names.length, "Mismatch between universe length and names array length");
@@ -38,28 +37,28 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
 
         this.option = option;
         this.allowedValues = allowedValues;
-        this.names = new Text[universe.length];
+        this.names = new ITextComponent[universe.length];
 
         for (int i = 0; i < this.names.length; i++) {
-            Text name;
+            ITextComponent name;
             T value = universe[i];
 
             if (value instanceof TextProvider) {
-                name = new LiteralText(((TextProvider)value).getLocalizedName());
-            } else if(value instanceof FormattedTextProvider) {
-                name = ((FormattedTextProvider)value).getLocalizedName();
+                name = new TextComponentString(((TextProvider) value).getLocalizedName());
+            } else if (value instanceof FormattedTextProvider) {
+                name = ((FormattedTextProvider) value).getLocalizedName();
             } else {
-                name = new LiteralText(value.name());
+                name = new TextComponentString(value.name());
             }
 
             this.names[i] = name;
         }
     }
 
-    private static Text[] toText(String[] names) {
-        Text[] textArray = new Text[names.length];
+    private static ITextComponent[] toText(String[] names) {
+        ITextComponent[] textArray = new ITextComponent[names.length];
         for (int i = 0; i < names.length; i++) {
-            textArray[i] = new LiteralText(names[i]);
+            textArray[i] = new TextComponentString(names[i]);
         }
         return textArray;
     }
@@ -81,10 +80,10 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
 
     private static class CyclingControlElement<T extends Enum<T>> extends ControlElement<T> {
         private final T[] allowedValues;
-        private final Text[] names;
+        private final ITextComponent[] names;
         private int currentIndex;
 
-        public CyclingControlElement(Option<T> option, Dim2i dim, T[] allowedValues, Text[] names) {
+        public CyclingControlElement(Option<T> option, Dim2i dim, T[] allowedValues, ITextComponent[] names) {
             super(option, dim);
 
             this.allowedValues = allowedValues;
@@ -100,17 +99,16 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
         }
 
         @Override
-        public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
-            super.render(matrixStack, mouseX, mouseY, delta);
+        public void render(int mouseX, int mouseY, float delta) {
+            super.render(mouseX, mouseY, delta);
 
             Enum<T> value = this.option.getValue();
-            Text name = this.names[value.ordinal()];
+            ITextComponent name = this.names[value.ordinal()];
 
             int strWidth = this.getTextWidth(name);
-            this.drawText(matrixStack, name, this.dim.getLimitX() - strWidth - 6, this.dim.getCenterY() - 4, 0xFFFFFFFF);
+            this.drawText(name, this.dim.getLimitX() - strWidth - 6, this.dim.getCenterY() - 4, 0xFFFFFFFF);
         }
 
-        @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (this.option.isAvailable() && button == 0 && this.dim.containsCursor(mouseX, mouseY)) {
                 this.currentIndex = (this.option.getValue().ordinal() + 1) % this.allowedValues.length;

@@ -4,10 +4,9 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.jellysquid.mods.sodium.client.gui.options.FormattedTextProvider;
-import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
-import net.minecraft.client.option.GraphicsMode;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.settings.GameSettings;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,91 +16,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SodiumGameOptions {
-    public final QualitySettings quality = new QualitySettings();
-    public final AdvancedSettings advanced = new AdvancedSettings();
-    public final PerformanceSettings performance = new PerformanceSettings();
-    public final NotificationSettings notifications = new NotificationSettings();
-
-    private Path configPath;
-
-    public static class AdvancedSettings {
-        public boolean useVertexArrayObjects = true;
-        public boolean useChunkMultidraw = true;
-
-        public boolean animateOnlyVisibleTextures = true;
-        public boolean useEntityCulling = true;
-        public boolean useParticleCulling = true;
-        public boolean useFogOcclusion = true;
-        public boolean useCompactVertexFormat = true;
-        public boolean useBlockFaceCulling = true;
-        public boolean allowDirectMemoryAccess = true;
-        public boolean ignoreDriverBlacklist = false;
-    }
-
-    public static class PerformanceSettings {
-        public int chunkBuilderThreads = 0;
-        public boolean alwaysDeferChunkUpdates = false;
-        public boolean useNoErrorGLContext = true;
-    }
-
-    public static class QualitySettings {
-        public GraphicsQuality cloudQuality = GraphicsQuality.DEFAULT;
-        public GraphicsQuality weatherQuality = GraphicsQuality.DEFAULT;
-        public GraphicsQuality leavesQuality = GraphicsQuality.DEFAULT;
-
-        public boolean enableVignette = true;
-        public boolean enableClouds = true;
-
-        public LightingQuality smoothLighting = LightingQuality.HIGH;
-    }
-
-    public static class NotificationSettings {
-        public boolean hideDonationButton = false;
-    }
-
-    public enum GraphicsQuality implements FormattedTextProvider {
-        DEFAULT(new TranslatableText("generator.default")),
-        FANCY(new TranslatableText("options.clouds.fancy")),
-        FAST(new TranslatableText("options.clouds.fast"));
-
-        private final Text name;
-
-        GraphicsQuality(Text name) {
-            this.name = name;
-        }
-
-        @Override
-        public Text getLocalizedName() {
-            return this.name;
-        }
-
-        public boolean isFancy(GraphicsMode graphicsMode) {
-            return (this == FANCY) || (this == DEFAULT && (graphicsMode == GraphicsMode.FANCY || graphicsMode == GraphicsMode.FABULOUS));
-        }
-    }
-
-    public enum LightingQuality implements FormattedTextProvider {
-        HIGH(new TranslatableText("options.ao.max")),
-        LOW(new TranslatableText("options.ao.min")),
-        OFF(new TranslatableText("options.ao.off"));
-
-        private final Text name;
-
-        LightingQuality(Text name) {
-            this.name = name;
-        }
-
-        @Override
-        public Text getLocalizedName() {
-            return this.name;
-        }
-    }
-
     private static final Gson GSON = new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .setPrettyPrinting()
             .excludeFieldsWithModifiers(Modifier.PRIVATE)
             .create();
+    public final QualitySettings quality = new QualitySettings();
+    public final AdvancedSettings advanced = new AdvancedSettings();
+    public final PerformanceSettings performance = new PerformanceSettings();
+    public final NotificationSettings notifications = new NotificationSettings();
+    private Path configPath;
 
     public static SodiumGameOptions load(Path path) {
         SodiumGameOptions config;
@@ -138,5 +62,78 @@ public class SodiumGameOptions {
 
         Files.write(this.configPath, GSON.toJson(this)
                 .getBytes(StandardCharsets.UTF_8));
+    }
+
+    public enum GraphicsQuality implements FormattedTextProvider {
+        DEFAULT(new TextComponentTranslation("generator.default")),
+        FANCY(new TextComponentTranslation("options.clouds.fancy")),
+        FAST(new TextComponentTranslation("options.clouds.fast"));
+
+        private final ITextComponent name;
+
+        GraphicsQuality(ITextComponent name) {
+            this.name = name;
+        }
+
+        @Override
+        public ITextComponent getLocalizedName() {
+            return this.name;
+        }
+
+        public boolean isFancy(GameSettings settings) {
+            return (this == FANCY) || (this == DEFAULT && settings.fancyGraphics);
+        }
+    }
+
+    public enum LightingQuality implements FormattedTextProvider {
+        HIGH(new TextComponentTranslation("options.ao.max")),
+        LOW(new TextComponentTranslation("options.ao.min")),
+        OFF(new TextComponentTranslation("options.ao.off"));
+
+        private final ITextComponent name;
+
+        LightingQuality(ITextComponent name) {
+            this.name = name;
+        }
+
+        @Override
+        public ITextComponent getLocalizedName() {
+            return this.name;
+        }
+    }
+
+    public static class AdvancedSettings {
+        public boolean useVertexArrayObjects = true;
+        public boolean useChunkMultidraw = true;
+
+        public boolean animateOnlyVisibleTextures = true;
+        public boolean useEntityCulling = true;
+        public boolean useParticleCulling = true;
+        public boolean useFogOcclusion = true;
+        public boolean useCompactVertexFormat = true;
+        public boolean useBlockFaceCulling = true;
+        public boolean allowDirectMemoryAccess = true;
+        public boolean ignoreDriverBlacklist = false;
+    }
+
+    public static class PerformanceSettings {
+        public int chunkBuilderThreads = 0;
+        public boolean alwaysDeferChunkUpdates = false;
+        public boolean useNoErrorGLContext = true;
+    }
+
+    public static class QualitySettings {
+        public GraphicsQuality cloudQuality = GraphicsQuality.DEFAULT;
+        public GraphicsQuality weatherQuality = GraphicsQuality.DEFAULT;
+        public GraphicsQuality leavesQuality = GraphicsQuality.DEFAULT;
+
+        public boolean enableVignette = true;
+        public boolean enableClouds = true;
+
+        public LightingQuality smoothLighting = LightingQuality.HIGH;
+    }
+
+    public static class NotificationSettings {
+        public boolean hideDonationButton = false;
     }
 }

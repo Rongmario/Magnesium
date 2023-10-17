@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.features.options;
 
 import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
+import net.minecraft.client.gui.GuiOptions;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -11,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(OptionsScreen.class)
-public class MixinOptionsScreen extends Screen {
+@Mixin(GuiOptions.class)
+public class MixinOptionsScreen extends GuiScreen {
     protected MixinOptionsScreen(Text title) {
         super(title);
     }

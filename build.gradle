@@ -71,6 +71,9 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl:3.2.2'
 
 	implementation 'org.jetbrains:annotations:24.0.1'
+
+	implementation 'com.mojang:datafixerupper:4.0.26'
+
 	annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
 	embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
 		exclude module: 'guava'

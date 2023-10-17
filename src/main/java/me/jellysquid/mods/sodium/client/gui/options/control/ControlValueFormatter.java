@@ -1,48 +1,47 @@
 package me.jellysquid.mods.sodium.client.gui.options.control;
 
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public interface ControlValueFormatter {
     static ControlValueFormatter guiScale() {
-        return (v) -> (v == 0) ? new TranslatableText("options.guiScale.auto").getString() : new TranslatableText(v + "x").getString();
+        return (v) -> (v == 0) ? new TextComponentTranslation("options.guiScale.auto").getFormattedText() : new TextComponentTranslation(v + "x").getFormattedText();
     }
 
     static ControlValueFormatter fpsLimit() {
-        return (v) -> (v == 260) ? new TranslatableText("options.framerateLimit.max").getString() : new TranslatableText("options.framerate", v).getString();
+        return (v) -> (v == 260) ? new TextComponentTranslation("options.framerateLimit.max").getFormattedText() : new TextComponentTranslation("options.framerate", v).getFormattedText();
     }
 
     static ControlValueFormatter brightness() {
         return (v) -> {
             if (v == 0) {
-                return new TranslatableText("options.gamma.min").getString();
+                return new TextComponentTranslation("options.gamma.min").getFormattedText();
             } else if (v == 100) {
-                return new TranslatableText("options.gamma.max").getString();
+                return new TextComponentTranslation("options.gamma.max").getFormattedText();
             } else {
-                return new TranslatableText(v + "%").getString();
+                return new TextComponentTranslation(v + "%").getFormattedText();
             }
         };
     }
 
-    String format(int value);
-
     static ControlValueFormatter percentage() {
-        return (v) -> new TranslatableText(v + "%").getString();
+        return (v) -> new TextComponentTranslation(v + "%").getFormattedText();
     }
 
     static ControlValueFormatter multiplier() {
-        return (v) -> new TranslatableText(v + "x").getString();
+        return (v) -> new TextComponentTranslation(v + "x").getFormattedText();
     }
 
     static ControlValueFormatter quantity(String name) {
-        return (v) -> new TranslatableText(name, v).getString();
+        return (v) -> new TextComponentTranslation(name, v).getFormattedText();
     }
 
     static ControlValueFormatter quantityOrDisabled(String name, String disableText) {
-        return (v) -> new TranslatableText(v == 0 ? disableText : name, v).getString();
+        return (v) -> new TextComponentTranslation(v == 0 ? disableText : name, v).getFormattedText();
     }
 
     static ControlValueFormatter number() {
         return String::valueOf;
     }
+
+    String format(int value);
 }
