@@ -7,7 +7,7 @@ public class ColorMixer {
     /**
      * Mixes two ARGB colors using the given ratios. Use {@link ColorMixer#getStartRatio(float)} and
      * {@link ColorMixer#getEndRatio(float)} to convert a floating-point ratio into a integer ratio.
-     *
+     * <p>
      * This method takes 64-bit inputs to avoid overflows when mixing the alpha channel. The helper method
      * {@link ColorMixer#mixARGB(int, int, int, int)} can be used with 32-bit inputs.
      *
@@ -19,11 +19,12 @@ public class ColorMixer {
      */
     public static long mixARGB(long c1, long c2, int f1, int f2) {
         return ((((((c1 & MASK1) * f1) + ((c2 & MASK1) * f2)) >> 8) & MASK1) |
-                        (((((c1 & MASK2) * f1) + ((c2 & MASK2) * f2)) >> 8) & MASK2));
+                (((((c1 & MASK2) * f1) + ((c2 & MASK2) * f2)) >> 8) & MASK2));
     }
 
     /**
      * Helper method to convert 32-bit integers to 64-bit integers and back.
+     *
      * @see ColorMixer#mixARGB(long, long, int, int)
      */
     public static int mixARGB(int c1, int c2, int f1, int f2) {

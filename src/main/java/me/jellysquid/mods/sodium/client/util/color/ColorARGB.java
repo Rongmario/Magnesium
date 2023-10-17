@@ -4,7 +4,7 @@ package me.jellysquid.mods.sodium.client.util.color;
  * Provides some utilities for packing and unpacking color components from packed integer colors in ARGB format. This
  * packed format is used by most of Minecraft, but special care must be taken to pack it into ABGR format before passing
  * it to OpenGL attributes.
- *
+ * <p>
  * | 32        | 24        | 16        | 8          |
  * | 0110 1100 | 0110 1100 | 0110 1100 | 0110 1100  |
  * | Alpha     | Red       | Green     | Blue       |
@@ -12,6 +12,7 @@ package me.jellysquid.mods.sodium.client.util.color;
 public class ColorARGB implements ColorU8 {
     /**
      * Packs the specified color components into big-endian format for consumption by OpenGL.
+     *
      * @param r The red component of the color
      * @param g The green component of the color
      * @param b The blue component of the color

@@ -8,14 +8,20 @@ import java.util.Random;
 // http://xoshiro.di.unimi.it/
 public class XoRoShiRoRandom extends Random {
     private static final long serialVersionUID = 1L;
-
+    private static final SplitMixRandom seedUniquifier = new SplitMixRandom(System.nanoTime());
     private SplitMixRandom mixer;
     private long seed = Long.MIN_VALUE;
     private long p0, p1; // The initialization words for the current seed
     private long s0, s1; // The current random words
     private boolean hasSavedState; // True if we can be quickly reseed by using resetting the words
 
-    private static final SplitMixRandom seedUniquifier = new SplitMixRandom(System.nanoTime());
+    public XoRoShiRoRandom() {
+        this(XoRoShiRoRandom.randomSeed());
+    }
+
+    public XoRoShiRoRandom(final long seed) {
+        this.setSeed(seed);
+    }
 
     public static long randomSeed() {
         final long x;
@@ -25,14 +31,6 @@ public class XoRoShiRoRandom extends Random {
         }
 
         return x ^ System.nanoTime();
-    }
-
-    public XoRoShiRoRandom() {
-        this(XoRoShiRoRandom.randomSeed());
-    }
-
-    public XoRoShiRoRandom(final long seed) {
-        this.setSeed(seed);
     }
 
     @Override
@@ -61,7 +59,7 @@ public class XoRoShiRoRandom extends Random {
         return (int) this.nextLong(n);
     }
 
-    private long nextLong(final long n) {
+    public long nextLong(final long n) {
         if (n <= 0) {
             throw new IllegalArgumentException("illegal bound " + n + " (must be positive)");
         }

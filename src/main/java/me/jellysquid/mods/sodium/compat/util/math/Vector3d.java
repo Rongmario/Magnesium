@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.compat.util.math;
 
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -45,6 +46,9 @@ public class Vector3d {
 
     public Vector3d(Vector3d p_i225900_1_) {
         this((double)p_i225900_1_.x(), (double)p_i225900_1_.y(), (double)p_i225900_1_.z());
+    }
+    public Vector3d(Vec3d vec3d){
+        this(vec3d.x,vec3d.y,vec3d.z);
     }
 
     public Vector3d vectorTo(Vector3d p_72444_1_) {
@@ -116,7 +120,9 @@ public class Vector3d {
     public Vector3d multiply(Vector3d p_216369_1_) {
         return this.multiply(p_216369_1_.x, p_216369_1_.y, p_216369_1_.z);
     }
-
+    public Vector3d multiply(double p_216369_1_) {
+        return this.multiply(p_216369_1_, p_216369_1_, p_216369_1_);
+    }
     public Vector3d multiply(double p_216372_1_, double p_216372_3_, double p_216372_5_) {
         return new Vector3d(this.x * p_216372_1_, this.y * p_216372_3_, this.z * p_216372_5_);
     }

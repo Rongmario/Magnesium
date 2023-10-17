@@ -3,7 +3,7 @@ package me.jellysquid.mods.sodium.client.util.color;
 /**
  * Provides some utilities for packing and unpacking color components from packed integer colors in ABGR format, which
  * is used by OpenGL for color vectors.
- *
+ * <p>
  * | 32        | 24        | 16        | 8          |
  * | 0110 1100 | 0110 1100 | 0110 1100 | 0110 1100  |
  * | Alpha     | Blue      | Green     | Red        |
@@ -11,6 +11,7 @@ package me.jellysquid.mods.sodium.client.util.color;
 public class ColorABGR implements ColorU8 {
     /**
      * Packs the specified color components into ABGR format.
+     *
      * @param r The red component of the color
      * @param g The green component of the color
      * @param b The blue component of the color
@@ -29,10 +30,11 @@ public class ColorABGR implements ColorU8 {
 
     /**
      * Multiplies the RGB components of the packed ABGR color using the given scale factors.
+     *
      * @param color The ABGR packed color to be multiplied
-     * @param rw The red component scale factor
-     * @param gw The green component scale factor
-     * @param bw The blue component scale factor
+     * @param rw    The red component scale factor
+     * @param gw    The green component scale factor
+     * @param bw    The blue component scale factor
      */
     public static int mul(int color, float rw, float gw, float bw) {
         float r = unpackRed(color) * rw;

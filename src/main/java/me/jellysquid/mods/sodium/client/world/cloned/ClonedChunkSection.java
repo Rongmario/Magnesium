@@ -5,95 +5,106 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPaletteFallback;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalleteArray;
+import me.jellysquid.mods.sodium.compat.client.renderer.CompatLightType;
+import me.jellysquid.mods.sodium.compat.util.math.ChunkSectionPos;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ChunkRenderContainer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BitArray;
 import net.minecraft.util.collection.PackedIntegerArray;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeArray;
 import net.minecraft.world.chunk.*;
+import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClonedChunkSection {
-    private static final LightType[] LIGHT_TYPES = LightType.values();
-    private static final ChunkSection EMPTY_SECTION = new ChunkSection(0);
+    private static final EnumSkyBlock[] LIGHT_TYPES = EnumSkyBlock.values();
+    private static final ExtendedBlockStorage EMPTY_SECTION = new ExtendedBlockStorage(0,true);
 
     private final AtomicInteger referenceCount = new AtomicInteger(0);
     private final ClonedChunkSectionCache backingCache;
 
-    private final Short2ObjectMap<BlockEntity> blockEntities;
-    private final ChunkNibbleArray[] lightDataArrays;
+    private final Short2ObjectMap<TileEntity> blockEntities;
+    private final NibbleArray[] lightDataArrays;
     private final World world;
 
     private ChunkSectionPos pos;
 
-    private PackedIntegerArray blockStateData;
-    private ClonedPalette<BlockState> blockStatePalette;
+    private BitArray blockStateData;
+    private ClonedPalette<IBlockState> blockStatePalette;
 
-    private BiomeArray biomeData;
+    private byte[] biomeData;
 
     ClonedChunkSection(ClonedChunkSectionCache backingCache, World world) {
         this.backingCache = backingCache;
         this.world = world;
         this.blockEntities = new Short2ObjectOpenHashMap<>();
-        this.lightDataArrays = new ChunkNibbleArray[LIGHT_TYPES.length];
+        this.lightDataArrays = new NibbleArray[LIGHT_TYPES.length];
     }
 
     public void init(ChunkSectionPos pos) {
-        WorldChunk chunk = world.getChunk(pos.getX(), pos.getZ());
+        Chunk chunk = world.getChunk(pos.getX(), pos.getZ());
 
         if (chunk == null) {
             throw new RuntimeException("Couldn't retrieve chunk at " + pos.toChunkPos());
         }
 
-        ChunkSection section = getChunkSection(chunk, pos);
+        ExtendedBlockStorage section = getChunkSection(chunk, pos);
 
-        if (section == WorldChunk.EMPTY_SECTION /*ChunkSection.isEmpty(section)*/) {
+        if (section == Chunk.NULL_BLOCK_STORAGE /*ChunkSection.isEmpty(section)*/) {
             section = EMPTY_SECTION;
         }
 
         this.pos = pos;
 
-        PalettedContainerExtended<BlockState> container = PalettedContainerExtended.cast(section.getContainer());;
+        PalettedContainerExtended<IBlockState> container = PalettedContainerExtended.cast(section.getContainer());;
 
         this.blockStateData = copyBlockData(container);
         this.blockStatePalette = copyPalette(container);
 
-        for (LightType type : LIGHT_TYPES) {
-            this.lightDataArrays[type.ordinal()] = world.getLightingProvider()
-                    .get(type)
-                    .getLightSection(pos);
+        for (EnumSkyBlock type : LIGHT_TYPES) {
+            BlockPos blockPos = new BlockPos(pos.getX(),pos.getY(),pos.getZ());
+
+            this.lightDataArrays[type.ordinal()] = world.getChunk(blockPos.getX(),blockPos.getZ()).getBlockStorageArray()[pos.getSectionY()].getBlockLight();
         }
 
         this.biomeData = chunk.getBiomeArray();
 
-        BlockBox box = new BlockBox(pos.getMinX(), pos.getMinY(), pos.getMinZ(), pos.getMaxX(), pos.getMaxY(), pos.getMaxZ());
+        AxisAlignedBB box = new AxisAlignedBB(pos.getMinX(), pos.getMinY(), pos.getMinZ(), pos.getMaxX(), pos.getMaxY(), pos.getMaxZ());
 
         this.blockEntities.clear();
 
-        for (Map.Entry<BlockPos, BlockEntity> entry : chunk.getBlockEntities().entrySet()) {
+        for (Map.Entry<BlockPos, TileEntity> entry : chunk.getTileEntityMap().entrySet()) {
             BlockPos entityPos = entry.getKey();
 
-            if (box.contains(entityPos)) {
+            if (box.contains(new Vec3d(entityPos))) {
                 //this.blockEntities.put(BlockPos.asLong(entityPos.getX() & 15, entityPos.getY() & 15, entityPos.getZ() & 15), entry.getValue());
             	this.blockEntities.put(ChunkSectionPos.packLocal(entityPos), entry.getValue());
             }
         }
     }
 
-    public BlockState getBlockState(int x, int y, int z) {
-        return this.blockStatePalette.get(this.blockStateData.get(y << 8 | z << 4 | x));
+    public IBlockState getBlockState(int x, int y, int z) {
+        return this.blockStatePalette.get(this.blockStateData.getAt(y << 8 | z << 4 | x));
     }
 
-    public int getLightLevel(LightType type, int x, int y, int z) {
-        ChunkNibbleArray array = this.lightDataArrays[type.ordinal()];
+    public int getLightLevel(EnumSkyBlock type, int x, int y, int z) {
+        NibbleArray array = this.lightDataArrays[type.ordinal()];
 
         if (array != null) {
             return array.get(x, y, z);
@@ -103,18 +114,18 @@ public class ClonedChunkSection {
     }
 
     public Biome getBiomeForNoiseGen(int x, int y, int z) {
-        return this.biomeData.getBiomeForNoiseGen(x, y, z);
+        return world.getBiome(new BlockPos(x,y,z));
     }
 
-    public BlockEntity getBlockEntity(int x, int y, int z) {
+    public TileEntity getBlockEntity(int x, int y, int z) {
         return this.blockEntities.get(packLocal(x, y, z));
     }
 
-    public PackedIntegerArray getBlockData() {
+    public BitArray getBlockData() {
         return this.blockStateData;
     }
 
-    public ClonedPalette<BlockState> getBlockPalette() {
+    public ClonedPalette<IBlockState> getBlockPalette() {
         return this.blockStatePalette;
     }
 
@@ -122,17 +133,13 @@ public class ClonedChunkSection {
         return this.pos;
     }
 
-    private static ClonedPalette<BlockState> copyPalette(PalettedContainerExtended<BlockState> container) {
-        Palette<BlockState> palette = container.getPalette();
+    private static ClonedPalette<IBlockState> copyPalette(PalettedContainerExtended<IBlockState> container) {
+        IBlockStatePalette palette = container.getPalette();
 
-        if (palette instanceof IdListPalette) {
-            return new ClonedPaletteFallback<>(Block.STATE_IDS);
-        }
-
-        BlockState[] array = new BlockState[1 << container.getPaletteSize()];
+        IBlockState[] array = new IBlockState[1 << container.getPaletteSize()];
 
         for (int i = 0; i < array.length; i++) {
-            array[i] = palette.getByIndex(i);
+            array[i] = palette.getBlockState(i);
 
             if (array[i] == null) {
                 break;
@@ -142,18 +149,18 @@ public class ClonedChunkSection {
         return new ClonedPalleteArray<>(array, container.getDefaultValue());
     }
 
-    private static PackedIntegerArray copyBlockData(PalettedContainerExtended<BlockState> container) {
-        PackedIntegerArray array = container.getDataArray();
-        long[] storage = array.getStorage();
+    private static BitArray copyBlockData(PalettedContainerExtended<IBlockState> container) {
+        BitArray array = container.getDataArray();
+        long[] storage = array.getBackingLongArray();
 
-        return new PackedIntegerArray(container.getPaletteSize(), array.getSize(), storage.clone());
+        return new BitArray(container.getPaletteSize(), array.size());
     }
 
-    private static ChunkSection getChunkSection(Chunk chunk, ChunkSectionPos pos) {
-        ChunkSection section = null;
+    private static ExtendedBlockStorage getChunkSection(Chunk chunk, ChunkSectionPos pos) {
+        ExtendedBlockStorage section = null;
 
-        if (!World.isOutOfBuildLimitVertically(ChunkSectionPos.getBlockCoord(pos.getY()))) {
-            section = chunk.getSectionArray()[pos.getY()];
+        if (!chunk.getWorld().isOutsideBuildHeight(new BlockPos(pos.getX(), pos.getY(), pos.getZ()))) {
+            section = chunk.getBlockStorageArray()[pos.getY()];
         }
 
         return section;

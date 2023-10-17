@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.util.math;
 
-import net.minecraft.util.math.Quaternion;
+import me.jellysquid.mods.sodium.compat.util.math.Quaternion;
 
 public interface Matrix4fExtended {
     /**
@@ -22,6 +22,7 @@ public interface Matrix4fExtended {
     /**
      * Applies this matrix transformation to the given input vector, returning the x-component. Avoids the lack of
      * struct types in Java and allows for allocation-free return.
+     *
      * @param x The x-component of the vector
      * @param y The y-component of the vector
      * @param z The z-component of the vector
@@ -32,6 +33,7 @@ public interface Matrix4fExtended {
     /**
      * Applies this matrix transformation to the given input vector, returning the y-component. Avoids the lack of
      * struct types in Java and allows for allocation-free return.
+     *
      * @param x The x-component of the vector
      * @param y The y-component of the vector
      * @param z The z-component of the vector
@@ -42,6 +44,7 @@ public interface Matrix4fExtended {
     /**
      * Applies this matrix transformation to the given input vector, returning the z-component. Avoids the lack of
      * struct types in Java and allows for allocation-free return.
+     *
      * @param x The x-component of the vector
      * @param y The y-component of the vector
      * @param z The z-component of the vector
