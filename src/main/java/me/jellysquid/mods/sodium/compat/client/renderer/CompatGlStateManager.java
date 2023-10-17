@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public final class CompatGlStateManager {
 
@@ -75,5 +76,13 @@ public final class CompatGlStateManager {
 
     public static int genBuffers(){
         return GL15.glGenBuffers();
+    }
+
+    public static void uniform1(int p_227718_0_, int p_227718_1_){
+        GL20.glUniform1i(p_227718_0_,p_227718_1_);
+    }
+
+    public static void uniformMatrix4(int p_227698_0_, boolean p_227698_1_, FloatBuffer p_227698_2_){
+        GL20.glUniformMatrix4(p_227698_0_,p_227698_1_,p_227698_2_);
     }
 }

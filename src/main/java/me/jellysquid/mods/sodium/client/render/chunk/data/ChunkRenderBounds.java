@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.data;
 
-import net.minecraft.util.math.ChunkSectionPos;
+import me.jellysquid.mods.sodium.compat.util.math.ChunkSectionPos;
 
 public class ChunkRenderBounds {
     public static final ChunkRenderBounds ALWAYS_FALSE = new ChunkRenderBounds(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY,
@@ -32,6 +32,16 @@ public class ChunkRenderBounds {
     public static class Builder {
         // Bit-mask of the blocks set on each axis
         private int x = 0, y = 0, z = 0;
+
+        // Return the left-bound of the bit-masked axis
+        private static int leftBound(int i) {
+            return Integer.numberOfTrailingZeros(i);
+        }
+
+        // Return the right-bound of the bit-masked axis
+        private static int rightBound(int i) {
+            return 32 - Integer.numberOfLeadingZeros(i);
+        }
 
         public void addBlock(int x, int y, int z) {
             // Accumulate bits on each axis for the given block position. This avoids needing to
@@ -66,16 +76,6 @@ public class ChunkRenderBounds {
                     Math.min(y2, origin.getMaxY()) + 0.5f,
                     Math.min(z2, origin.getMaxZ()) + 0.5f
             );
-        }
-
-        // Return the left-bound of the bit-masked axis
-        private static int leftBound(int i) {
-            return Integer.numberOfTrailingZeros(i);
-        }
-
-        // Return the right-bound of the bit-masked axis
-        private static int rightBound(int i) {
-            return 32 - Integer.numberOfLeadingZeros(i);
         }
     }
 }

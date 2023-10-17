@@ -1,22 +1,21 @@
 package me.jellysquid.mods.sodium.client.render.chunk.passes;
 
-import net.minecraft.client.render.RenderLayer;
+import me.jellysquid.mods.sodium.compat.client.renderer.CompatRenderLayer;
 
 // TODO: Move away from using an enum, make this extensible
 public enum BlockRenderPass {
-    SOLID(RenderLayer.getSolid(), false),
-    CUTOUT(RenderLayer.getCutout(), false),
-    CUTOUT_MIPPED(RenderLayer.getCutoutMipped(), false),
-    TRANSLUCENT(RenderLayer.getTranslucent(), true),
-    TRIPWIRE(RenderLayer.getTripwire(), true);
+    SOLID(CompatRenderLayer.getSolid(), false),
+    CUTOUT(CompatRenderLayer.getCutout(), false),
+    CUTOUT_MIPPED(CompatRenderLayer.getCutoutMipped(), false),
+    TRANSLUCENT(CompatRenderLayer.getTranslucent(), true)
 
     public static final BlockRenderPass[] VALUES = BlockRenderPass.values();
     public static final int COUNT = VALUES.length;
 
-    private final RenderLayer layer;
+    private final CompatRenderLayer layer;
     private final boolean translucent;
 
-    BlockRenderPass(RenderLayer layer, boolean translucent) {
+    BlockRenderPass(CompatRenderLayer layer, boolean translucent) {
         this.layer = layer;
         this.translucent = translucent;
     }
@@ -26,10 +25,10 @@ public enum BlockRenderPass {
     }
 
     public void endDrawing() {
-        this.layer.endDrawing();
+        //this.layer.endDrawing();
     }
 
     public void startDrawing() {
-        this.layer.startDrawing();
+        //this.layer.startDrawing();
     }
-}
+    }

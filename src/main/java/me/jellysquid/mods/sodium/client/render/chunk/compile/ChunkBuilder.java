@@ -45,20 +45,34 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<Thread> threads = new ArrayList<>();
-
-    private ClonedChunkSectionCache sectionCache;
-
-    private World world;
-    private BlockRenderPassManager renderPassManager;
-
     private final int limitThreads;
     private final ChunkVertexType vertexType;
     private final ChunkRenderBackend<T> backend;
+    private ClonedChunkSectionCache sectionCache;
+    private World world;
+    private BlockRenderPassManager renderPassManager;
 
     public ChunkBuilder(ChunkVertexType vertexType, ChunkRenderBackend<T> backend) {
         this.vertexType = vertexType;
         this.backend = backend;
         this.limitThreads = getThreadCount();
+    }
+
+    /**
+     * Returns the "optimal" number of threads to be used for chunk build tasks. This is always at least one thread,
+     * but can be up to the number of available processor threads on the system.
+     */
+    private static int getOptimalThreadCount() {
+        return MathHelper.clamp(Math.max(getMaxThreadCount() / 3, getMaxThreadCount() - 6), 1, 10);
+    }
+
+    private static int getThreadCount() {
+        int requested = SodiumClientMod.options().performance.chunkBuilderThreads;
+        return requested == 0 ? getOptimalThreadCount() : Math.min(requested, getMaxThreadCount());
+    }
+
+    private static int getMaxThreadCount() {
+        return Runtime.getRuntime().availableProcessors();
     }
 
     /**
@@ -185,7 +199,8 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
      * Initializes this chunk builder for the given world. If the builder is already running (which can happen during
      * a world teleportation event), the worker threads will first be stopped and all pending tasks will be discarded
      * before being started again.
-     * @param world The world instance
+     *
+     * @param world             The world instance
      * @param renderPassManager The render pass manager used for the world
      */
     public void init(ClientWorld world, BlockRenderPassManager renderPassManager) {
@@ -203,26 +218,10 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     }
 
     /**
-     * Returns the "optimal" number of threads to be used for chunk build tasks. This is always at least one thread,
-     * but can be up to the number of available processor threads on the system.
-     */
-    private static int getOptimalThreadCount() {
-        return MathHelper.clamp(Math.max(getMaxThreadCount() / 3, getMaxThreadCount() - 6), 1, 10);
-    }
-
-    private static int getThreadCount() {
-        int requested = SodiumClientMod.options().performance.chunkBuilderThreads;
-        return requested == 0 ? getOptimalThreadCount() : Math.min(requested, getMaxThreadCount());
-    }
-
-    private static int getMaxThreadCount() {
-        return Runtime.getRuntime().availableProcessors();
-    }
-
-    /**
      * Creates a rebuild task and defers it to the work queue. When the task is completed, it will be moved onto the
      * completed uploads queued which will then be drained during the next available synchronization point with the
      * main thread.
+     *
      * @param render The render to rebuild
      */
     public void deferRebuild(ChunkRenderContainer<T> render) {
@@ -234,6 +233,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     /**
      * Enqueues the build task result to the pending result queue to be later processed during the next available
      * synchronization point on the main thread.
+     *
      * @param result The build task's result
      */
     private void enqueueUpload(ChunkBuildResult<T> result) {
@@ -242,6 +242,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
 
     /**
      * Schedules the rebuild task asynchronously on the worker pool, returning a future wrapping the task.
+     *
      * @param render The render to rebuild
      */
     public CompletableFuture<ChunkBuildResult<T>> scheduleRebuildTaskAsync(ChunkRenderContainer<T> render) {
@@ -250,6 +251,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
 
     /**
      * Creates a task to rebuild the geometry of a {@link ChunkRenderContainer}.
+     *
      * @param render The render to rebuild
      */
     private ChunkRenderBuildTask<T> createRebuildTask(ChunkRenderContainer<T> render) {
@@ -266,6 +268,21 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
 
     public void onChunkDataChanged(int x, int y, int z) {
         this.sectionCache.invalidate(x, y, z);
+    }
+
+    private static class WrappedTask<T extends ChunkGraphicsState> implements CancellationSource {
+        private final ChunkRenderBuildTask<T> task;
+        private final CompletableFuture<ChunkBuildResult<T>> future;
+
+        private WrappedTask(ChunkRenderBuildTask<T> task) {
+            this.task = task;
+            this.future = new CompletableFuture<>();
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return this.future.isCancelled();
+        }
     }
 
     private class WorkerRunnable implements Runnable {
@@ -335,21 +352,6 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
             }
 
             return job;
-        }
-    }
-
-    private static class WrappedTask<T extends ChunkGraphicsState> implements CancellationSource {
-        private final ChunkRenderBuildTask<T> task;
-        private final CompletableFuture<ChunkBuildResult<T>> future;
-
-        private WrappedTask(ChunkRenderBuildTask<T> task) {
-            this.task = task;
-            this.future = new CompletableFuture<>();
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return this.future.isCancelled();
         }
     }
 }

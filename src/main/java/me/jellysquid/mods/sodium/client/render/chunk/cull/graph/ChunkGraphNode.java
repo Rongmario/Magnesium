@@ -3,9 +3,9 @@ package me.jellysquid.mods.sodium.client.render.chunk.cull.graph;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.client.render.chunk.ChunkOcclusionData;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
+import net.minecraft.client.renderer.chunk.SetVisibility;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class ChunkGraphNode {
     private static final long DEFAULT_VISIBILITY_DATA = calculateVisibilityData(ChunkRenderData.EMPTY.getOcclusionData());
@@ -29,16 +29,30 @@ public class ChunkGraphNode {
         this.visibilityData = DEFAULT_VISIBILITY_DATA;
     }
 
+    private static long calculateVisibilityData(SetVisibility occlusionData) {
+        long visibilityData = 0;
+
+        for (Direction from : DirectionUtil.ALL_DIRECTIONS) {
+            for (Direction to : DirectionUtil.ALL_DIRECTIONS) {
+                if (occlusionData == null || occlusionData.isVisible(from.to(), to.to())) {
+                    visibilityData |= (1L << ((from.ordinal() << 3) + to.ordinal()));
+                }
+            }
+        }
+
+        return visibilityData;
+    }
+
     public ChunkGraphNode getConnectedNode(Direction dir) {
         return this.nodes[dir.ordinal()];
     }
 
-    public void setLastVisibleFrame(int frame) {
-        this.lastVisibleFrame = frame;
-    }
-
     public int getLastVisibleFrame() {
         return this.lastVisibleFrame;
+    }
+
+    public void setLastVisibleFrame(int frame) {
+        this.lastVisibleFrame = frame;
     }
 
     public int getChunkX() {
@@ -57,22 +71,8 @@ public class ChunkGraphNode {
         this.nodes[dir.ordinal()] = node;
     }
 
-    public void setOcclusionData(ChunkOcclusionData occlusionData) {
+    public void setOcclusionData(SetVisibility occlusionData) {
         this.visibilityData = calculateVisibilityData(occlusionData);
-    }
-
-    private static long calculateVisibilityData(ChunkOcclusionData occlusionData) {
-        long visibilityData = 0;
-
-        for (Direction from : DirectionUtil.ALL_DIRECTIONS) {
-            for (Direction to : DirectionUtil.ALL_DIRECTIONS) {
-                if (occlusionData == null || occlusionData.isVisibleThrough(from, to)) {
-                    visibilityData |= (1L << ((from.ordinal() << 3) + to.ordinal()));
-                }
-            }
-        }
-
-        return visibilityData;
     }
 
     public boolean isVisibleThrough(Direction from, Direction to) {

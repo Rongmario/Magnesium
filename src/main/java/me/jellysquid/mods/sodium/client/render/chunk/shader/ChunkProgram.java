@@ -1,14 +1,12 @@
 package me.jellysquid.mods.sodium.client.render.chunk.shader;
 
-import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
+import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
 import me.jellysquid.mods.sodium.client.render.GameRendererContext;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
-import org.lwjgl.opengl.GL20C;
+import me.jellysquid.mods.sodium.compat.client.renderer.CompatGlStateManager;
+import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL20C;
+import me.jellysquid.mods.sodium.compat.util.Identifier;
 import org.lwjgl.system.MemoryStack;
-
-import com.mojang.blaze3d.platform.GlStateManager;
 
 import java.util.function.Function;
 
@@ -39,17 +37,18 @@ public class ChunkProgram extends GlProgram {
         this.fogShader = fogShaderFunction.apply(this);
     }
 
-    public void setup(MatrixStack matrixStack, float modelScale, float textureScale) {
-        GlStateManager.uniform1(this.uBlockTex, 0);
-        GlStateManager.uniform1(this.uLightTex, 2);
+    public void setup(float modelScale, float textureScale) {
 
-        GL20C.glUniform3f(this.uModelScale, modelScale, modelScale, modelScale);
-        GL20C.glUniform2f(this.uTextureScale, textureScale, textureScale);
+        CompatGlStateManager.uniform1(this.uBlockTex, 0);
+        CompatGlStateManager.uniform1(this.uLightTex, 2);
+
+        CompatGL20C.glUniform3f(this.uModelScale, modelScale, modelScale, modelScale);
+        CompatGL20C.glUniform2f(this.uTextureScale, textureScale, textureScale);
 
         this.fogShader.setup();
 
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-        	GlStateManager.uniformMatrix4(this.uModelViewProjectionMatrix, false,
+            CompatGlStateManager.uniformMatrix4(this.uModelViewProjectionMatrix, false,
                     GameRendererContext.getModelViewProjectionMatrix(matrixStack.peek(), memoryStack));
         }
     }

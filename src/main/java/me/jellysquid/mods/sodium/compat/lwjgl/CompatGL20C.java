@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.compat.lwjgl;
 
 import org.lwjgl.opengl.*;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public final class CompatGL20C {
@@ -41,6 +42,9 @@ public final class CompatGL20C {
 
     public static final int GL_UNSIGNED_BYTE = GL11.GL_UNSIGNED_BYTE;
 
+    public static final int GL_VENDOR = GL11.GL_VENDOR;
+
+    public static final int GL_VERSION = GL11.GL_VERSION;
     public static void glBufferData(int target, long data_size, int usage){
         GL15.glBufferData(target,data_size,usage);
     }
@@ -69,4 +73,29 @@ public final class CompatGL20C {
         GL20.glDisableVertexAttribArray(index);
     }
 
+    public static void glVertexAttrib4fv(int index, float x, float y, float z, float w){
+        GL20.glVertexAttrib4f(index,x,y,z,w);
+    }
+    public static void glVertexAttrib4fv(int index, FloatBuffer buffer){
+        GL20.glVertexAttribPointer(index, buffer.capacity(), false, buffer.position(),buffer);
+    }
+
+    public static void glUniform3f(int location, float v0, float v1, float v2){
+        GL20.glUniform3f(location,v0,v1,v2);
+    }
+
+    public static void glUniform2f(int location, float v0, float v1){
+        GL20.glUniform2f(location,v0,v1);
+    }
+
+    public static void glUniform4fv(int location, FloatBuffer values){
+        GL20.glUniform4(location,values);
+    }
+    public static void glUniform4fv(int location, float[] values){
+        glUniform4fv(location,FloatBuffer.wrap(values));
+    }
+
+    public static void glUniform1f(int location, float v0){
+        GL20.glUniform1f(location,v0);
+    }
 }

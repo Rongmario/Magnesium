@@ -7,9 +7,9 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
-import net.minecraft.client.texture.Sprite;
+import me.jellysquid.mods.sodium.compat.util.math.ChunkSectionPos;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
 
 import java.lang.reflect.Array;
 import java.util.concurrent.CompletableFuture;
@@ -64,6 +64,17 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
         return this.data;
     }
 
+    public void setData(ChunkRenderData info) {
+        if (info == null) {
+            throw new NullPointerException("Mesh information must not be null");
+        }
+
+        this.worldRenderer.onChunkRenderUpdated(this.chunkX, this.chunkY, this.chunkZ, this.data, info);
+        this.data = info;
+
+        this.tickable = !info.getAnimatedSprites().isEmpty();
+    }
+
     /**
      * @return True if the render's state is out of date with the world state
      */
@@ -102,20 +113,10 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
         }
     }
 
-    public void setData(ChunkRenderData info) {
-        if (info == null) {
-            throw new NullPointerException("Mesh information must not be null");
-        }
-
-        this.worldRenderer.onChunkRenderUpdated(this.chunkX, this.chunkY, this.chunkZ, this.data, info);
-        this.data = info;
-
-        this.tickable = !info.getAnimatedSprites().isEmpty();
-    }
-
     /**
      * Marks this render as needing an update. Important updates are scheduled as "blocking" and will prevent the next
      * frame from being rendered until the update is performed.
+     *
      * @param important True if the update is blocking, otherwise false
      */
     public boolean scheduleRebuild(boolean important) {
@@ -143,6 +144,7 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
 
     /**
      * Tests if the given chunk render is visible within the provided frustum.
+     *
      * @param frustum The frustum to test against
      * @return True if visible, otherwise false
      */
@@ -159,7 +161,7 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
      * time before this render is drawn if {@link ChunkRenderContainer#isTickable()} is true.
      */
     public void tick() {
-        for (Sprite sprite : this.data.getAnimatedSprites()) {
+        for (TextureAtlasSprite sprite : this.data.getAnimatedSprites()) {
             SpriteUtil.markSpriteActive(sprite);
         }
     }
@@ -283,11 +285,11 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
         return this.column.areNeighborsPresent();
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getId() {
         return this.id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

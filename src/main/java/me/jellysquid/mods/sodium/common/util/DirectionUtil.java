@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.common.util;
 
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
 import net.minecraft.util.math.Direction;
 
 /**

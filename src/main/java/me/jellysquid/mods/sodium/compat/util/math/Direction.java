@@ -184,6 +184,24 @@ public enum Direction implements IStringSerializable {
         return this.normal.getZ();
     }
 
+    public EnumFacing to(){
+        switch (this){
+            case UP:
+                return EnumFacing.UP;
+            case DOWN:
+                return EnumFacing.DOWN;
+            case EAST:
+                return EnumFacing.EAST;
+            case WEST:
+                return EnumFacing.WEST;
+            case SOUTH:
+                return EnumFacing.SOUTH;
+            case NORTH:
+                return EnumFacing.NORTH;
+        }
+        return null;
+    }
+
     @SideOnly(Side.CLIENT)
     public Vector3f step() {
         return new Vector3f((float) this.getStepX(), (float) this.getStepY(), (float) this.getStepZ());

@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.format;
 public class ModelVertexUtil {
     /**
      * Converts a floating point vertex position in range 0..32 to a de-normalized unsigned short.
+     *
      * @param value The float in range 0..32
      * @return The resulting de-normalized unsigned short
      */
@@ -15,6 +16,7 @@ public class ModelVertexUtil {
 
     /**
      * Converts a normalized floating point texture coordinate to a de-normalized unsigned short.
+     *
      * @param value The normalized float
      * @return The resulting de-normalized unsigned short
      */
@@ -27,7 +29,7 @@ public class ModelVertexUtil {
      * texture coordinates as two un-normalized unsigned shorts in the range 0..255. Using the fixed-function pipeline,
      * it then applies a matrix transformation which normalizes these coordinates and applies a centering offset. This
      * operation has non-zero overhead and complicates shader code a bit.
-     *
+     * <p>
      * To work around the problem, this function instead normalizes these light map texture coordinates and applies the
      * centering offset, allowing it to be baked into the vertex data itself.
      *

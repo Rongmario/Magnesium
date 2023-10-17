@@ -23,10 +23,8 @@ import java.util.Map;
 
 public class ChunkOneshotGraphicsState extends ChunkGraphicsState {
     private final GlMutableBuffer vertexBuffer;
-
-    protected GlTessellation tessellation;
-
     private final long[] parts;
+    protected GlTessellation tessellation;
 
     protected ChunkOneshotGraphicsState(RenderDevice device, ChunkRenderContainer<?> container) {
         super(container);
@@ -71,8 +69,8 @@ public class ChunkOneshotGraphicsState extends ChunkGraphicsState {
 
         GlVertexFormat<ChunkMeshAttribute> vertexFormat = (GlVertexFormat<ChunkMeshAttribute>) vertexData.format;
 
-        this.tessellation = commandList.createTessellation(GlPrimitiveType.QUADS, new TessellationBinding[] {
-                new TessellationBinding(this.vertexBuffer, new GlVertexAttributeBinding[] {
+        this.tessellation = commandList.createTessellation(GlPrimitiveType.QUADS, new TessellationBinding[]{
+                new TessellationBinding(this.vertexBuffer, new GlVertexAttributeBinding[]{
                         new GlVertexAttributeBinding(ChunkShaderBindingPoints.POSITION, vertexFormat.getAttribute(ChunkMeshAttribute.POSITION)),
                         new GlVertexAttributeBinding(ChunkShaderBindingPoints.COLOR, vertexFormat.getAttribute(ChunkMeshAttribute.COLOR)),
                         new GlVertexAttributeBinding(ChunkShaderBindingPoints.TEX_COORD, vertexFormat.getAttribute(ChunkMeshAttribute.TEXTURE)),

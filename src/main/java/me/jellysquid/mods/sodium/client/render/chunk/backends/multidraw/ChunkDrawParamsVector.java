@@ -1,8 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.backends.multidraw;
 
-import org.lwjgl.system.MemoryUtil;
-
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
@@ -51,7 +50,7 @@ public abstract class ChunkDrawParamsVector extends StructBuffer {
                 this.growBuffer();
             }
 
-            MemoryUtil.memPutFloat(this.writePointer    , x);
+            MemoryUtil.memPutFloat(this.writePointer, x);
             MemoryUtil.memPutFloat(this.writePointer + 4, y);
             MemoryUtil.memPutFloat(this.writePointer + 8, z);
 
@@ -90,7 +89,7 @@ public abstract class ChunkDrawParamsVector extends StructBuffer {
             }
 
             ByteBuffer buf = this.buffer;
-            buf.putFloat(this.writeOffset    , x);
+            buf.putFloat(this.writeOffset, x);
             buf.putFloat(this.writeOffset + 4, y);
             buf.putFloat(this.writeOffset + 8, z);
 

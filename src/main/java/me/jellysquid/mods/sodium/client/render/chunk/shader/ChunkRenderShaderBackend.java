@@ -1,28 +1,25 @@
 package me.jellysquid.mods.sodium.client.render.chunk.shader;
 
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
+import me.jellysquid.mods.sodium.client.gl.compat.FogHelper;
+import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
 import me.jellysquid.mods.sodium.client.gl.shader.GlShader;
-import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.gl.shader.ShaderLoader;
 import me.jellysquid.mods.sodium.client.gl.shader.ShaderType;
-import me.jellysquid.mods.sodium.client.gl.compat.FogHelper;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import me.jellysquid.mods.sodium.compat.util.Identifier;
 
 import java.util.EnumMap;
 
 public abstract class ChunkRenderShaderBackend<T extends ChunkGraphicsState>
         implements ChunkRenderBackend<T> {
-    private final EnumMap<ChunkFogMode, ChunkProgram> programs = new EnumMap<>(ChunkFogMode.class);
-
     protected final ChunkVertexType vertexType;
     protected final GlVertexFormat<ChunkMeshAttribute> vertexFormat;
-
+    private final EnumMap<ChunkFogMode, ChunkProgram> programs = new EnumMap<>(ChunkFogMode.class);
     protected ChunkProgram activeProgram;
 
     public ChunkRenderShaderBackend(ChunkVertexType vertexType) {
@@ -61,14 +58,14 @@ public abstract class ChunkRenderShaderBackend<T extends ChunkGraphicsState>
     }
 
     @Override
-    public void begin(MatrixStack matrixStack) {
+    public void begin() {
         this.activeProgram = this.programs.get(FogHelper.getFogMode());
         this.activeProgram.bind();
-        this.activeProgram.setup(matrixStack, this.vertexType.getModelScale(), this.vertexType.getTextureScale());
+        this.activeProgram.setup(this.vertexType.getModelScale(), this.vertexType.getTextureScale());
     }
 
     @Override
-    public void end(MatrixStack matrixStack) {
+    public void end() {
         this.activeProgram.unbind();
         this.activeProgram = null;
     }

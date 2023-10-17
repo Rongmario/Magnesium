@@ -7,7 +7,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.type.BlittableVertexType;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
-import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.renderer.BufferBuilder;
 
 /**
  * Uses half-precision floating point numbers to represent position coordinates and normalized unsigned shorts for
@@ -16,19 +16,19 @@ import net.minecraft.client.render.VertexConsumer;
  */
 public class HFPModelVertexType implements ChunkVertexType {
     public static final GlVertexFormat<ChunkMeshAttribute> VERTEX_FORMAT =
-			GlVertexFormat.builder(ChunkMeshAttribute.class, 20)
-	        .addElement(ChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.UNSIGNED_SHORT, 3, false)
-	        .addElement(ChunkMeshAttribute.COLOR, 8, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true)
-	        .addElement(ChunkMeshAttribute.TEXTURE, 12, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false)
-	        .addElement(ChunkMeshAttribute.LIGHT, 16, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true)
-	        .build();
-            
+            GlVertexFormat.builder(ChunkMeshAttribute.class, 20)
+                    .addElement(ChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.UNSIGNED_SHORT, 3, false)
+                    .addElement(ChunkMeshAttribute.COLOR, 8, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true)
+                    .addElement(ChunkMeshAttribute.TEXTURE, 12, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false)
+                    .addElement(ChunkMeshAttribute.LIGHT, 16, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true)
+                    .build();
+
 
     public static final float MODEL_SCALE = (32.0f / 65536.0f);
     public static final float TEXTURE_SCALE = (1.0f / 32768.0f);
 
     @Override
-    public ModelVertexSink createFallbackWriter(VertexConsumer consumer) {
+    public ModelVertexSink createFallbackWriter(BufferBuilder consumer) {
         throw new UnsupportedOperationException();
     }
 

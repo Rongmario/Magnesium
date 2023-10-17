@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.util.math.Direction;
+import me.jellysquid.mods.sodium.compat.util.math.Direction;
 
 public class ChunkRenderColumn<T extends ChunkGraphicsState> {
     @SuppressWarnings("unchecked")

@@ -16,7 +16,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderListIterat
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkRenderShaderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderBindingPoints;
-import org.lwjgl.opengl.GL20C;
+import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL20C;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
@@ -83,14 +83,14 @@ public class ChunkRenderBackendOneshot extends ChunkRenderShaderBackend<ChunkOne
         float modelX = camera.getChunkModelOffset(state.getX(), camera.blockOriginX, camera.originX);
         float modelY = camera.getChunkModelOffset(state.getY(), camera.blockOriginY, camera.originY);
         float modelZ = camera.getChunkModelOffset(state.getZ(), camera.blockOriginZ, camera.originZ);
-        
+
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer fb = stack.mallocFloat(4);
             fb.put(0, modelX);
             fb.put(1, modelY);
             fb.put(2, modelZ);
 
-            GL20C.glVertexAttrib4fv(ChunkShaderBindingPoints.MODEL_OFFSET.getGenericAttributeIndex(), fb);
+            CompatGL20C.glVertexAttrib4fv(ChunkShaderBindingPoints.MODEL_OFFSET.getGenericAttributeIndex(), fb);
         }
     }
 
@@ -112,9 +112,9 @@ public class ChunkRenderBackendOneshot extends ChunkRenderShaderBackend<ChunkOne
         this.batch.end();
 
         if (!batch.isEmpty()) {
-	        try (DrawCommandList drawCommandList = commandList.beginTessellating(state.tessellation)) {
-	            drawCommandList.multiDrawArrays(this.batch.getIndicesBuffer(), this.batch.getLengthBuffer());
-	        }
+            try (DrawCommandList drawCommandList = commandList.beginTessellating(state.tessellation)) {
+                drawCommandList.multiDrawArrays(this.batch.getIndicesBuffer(), this.batch.getLengthBuffer());
+            }
         }
     }
 

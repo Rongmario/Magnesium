@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.util.MathUtil;
-import net.minecraft.util.math.ChunkSectionPos;
+import me.jellysquid.mods.sodium.compat.util.math.ChunkSectionPos;
 import org.apache.commons.lang3.Validate;
 
 public class ChunkRegionManager<T extends ChunkGraphicsState> {
@@ -32,6 +32,10 @@ public class ChunkRegionManager<T extends ChunkGraphicsState> {
         this.device = device;
     }
 
+    public static long getRegionKey(int x, int y, int z) {
+        return ChunkSectionPos.asLong(x >> BUFFER_WIDTH_SH, y >> BUFFER_HEIGHT_SH, z >> BUFFER_LENGTH_SH);
+    }
+
     public ChunkRegion<T> getRegion(int x, int y, int z) {
         return this.regions.get(getRegionKey(x, y, z));
     }
@@ -46,10 +50,6 @@ public class ChunkRegionManager<T extends ChunkGraphicsState> {
         }
 
         return region;
-    }
-
-    public static long getRegionKey(int x, int y, int z) {
-        return ChunkSectionPos.asLong(x >> BUFFER_WIDTH_SH, y >> BUFFER_HEIGHT_SH, z >> BUFFER_LENGTH_SH);
     }
 
     public void delete() {

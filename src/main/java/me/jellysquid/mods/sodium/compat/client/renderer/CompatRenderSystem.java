@@ -21,4 +21,9 @@ public class CompatRenderSystem {
     public static void enableTexture(){
         GlStateManager.enableTexture2D();
     }
+
+    @Deprecated
+    public static void clearCurrentColor(){
+       // GlStateManager.
+    }
 }

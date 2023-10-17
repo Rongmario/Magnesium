@@ -53,9 +53,13 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
     public int getCount() {
         return this.count;
     }
-    
+
     public boolean isEmpty() {
         return this.count <= 0;
+    }
+
+    public int getArrayLength() {
+        return this.arrayLength;
     }
 
     public static class UnsafeChunkDrawCallBatcher extends ChunkDrawCallBatcher {
@@ -82,9 +86,9 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
                 throw new BufferUnderflowException();
             }
 
-            MemoryUtil.memPutInt(this.writePointer     , count);         // Vertex Count
-            MemoryUtil.memPutInt(this.writePointer +  4, instanceCount); // Instance Count
-            MemoryUtil.memPutInt(this.writePointer +  8, first);         // Vertex Start
+            MemoryUtil.memPutInt(this.writePointer, count);         // Vertex Count
+            MemoryUtil.memPutInt(this.writePointer + 4, instanceCount); // Instance Count
+            MemoryUtil.memPutInt(this.writePointer + 8, first);         // Vertex Start
             MemoryUtil.memPutInt(this.writePointer + 12, baseInstance);  // Base Instance
 
             this.writePointer += this.stride;
@@ -108,18 +112,14 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
         @Override
         public void addIndirectDrawCall(int first, int count, int baseInstance, int instanceCount) {
             ByteBuffer buf = this.buffer;
-            buf.putInt(this.writeOffset     , count);             // Vertex Count
-            buf.putInt(this.writeOffset +  4, instanceCount);     // Instance Count
-            buf.putInt(this.writeOffset +  8, first);             // Vertex Start
+            buf.putInt(this.writeOffset, count);             // Vertex Count
+            buf.putInt(this.writeOffset + 4, instanceCount);     // Instance Count
+            buf.putInt(this.writeOffset + 8, first);             // Vertex Start
             buf.putInt(this.writeOffset + 12, baseInstance);      // Base Instance
 
             this.writeOffset += this.stride;
             this.count++;
         }
-    }
-
-    public int getArrayLength() {
-        return this.arrayLength;
     }
 
 }
