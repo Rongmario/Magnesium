@@ -32,6 +32,20 @@ public final class CompatRenderLayer {
     private final boolean affectsCrumbling;
     private final boolean sortOnUpload;
 
+    public static CompatRenderLayer from(BlockRenderLayer renderLayer){
+        switch (renderLayer){
+            case SOLID:
+                return getSolid();
+            case CUTOUT:
+                return getCutout();
+            case TRANSLUCENT:
+                return getTranslucent();
+            case CUTOUT_MIPPED:
+                return getCutoutMipped();
+        }
+        return null;
+    }
+
     private CompatRenderLayer(BlockRenderLayer type, VertexFormat format, int mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload) {
         this.type = type;
         this.format = format;

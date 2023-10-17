@@ -107,10 +107,10 @@ public class MixinItemRenderer {
             return colorA;
         }
         // General case (rare): Both colorings, actually perform the multiplication
-        int a = (int)((ColorABGR.unpackAlpha(colorA)/255.0f) * (ColorABGR.unpackAlpha(colorB)/255.0f) * 255.0f);
-        int b = (int)((ColorABGR.unpackBlue(colorA)/255.0f) * (ColorABGR.unpackBlue(colorB)/255.0f) * 255.0f);
-        int g = (int)((ColorABGR.unpackGreen(colorA)/255.0f) * (ColorABGR.unpackGreen(colorB)/255.0f) * 255.0f);
-        int r = (int)((ColorABGR.unpackRed(colorA)/255.0f) * (ColorABGR.unpackRed(colorB)/255.0f) * 255.0f);
+        int a = (int) ((ColorABGR.unpackAlpha(colorA) / 255.0f) * (ColorABGR.unpackAlpha(colorB) / 255.0f) * 255.0f);
+        int b = (int) ((ColorABGR.unpackBlue(colorA) / 255.0f) * (ColorABGR.unpackBlue(colorB) / 255.0f) * 255.0f);
+        int g = (int) ((ColorABGR.unpackGreen(colorA) / 255.0f) * (ColorABGR.unpackGreen(colorB) / 255.0f) * 255.0f);
+        int r = (int) ((ColorABGR.unpackRed(colorA) / 255.0f) * (ColorABGR.unpackRed(colorB) / 255.0f) * 255.0f);
         return ColorABGR.pack(r, g, b, a);
     }
 

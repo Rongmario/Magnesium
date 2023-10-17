@@ -24,7 +24,7 @@ public class MixinWindow {
 
     @Unique
     private void setupWorkaround() {
-        if(Util.getOperatingSystem() == Util.OperatingSystem.LINUX) {
+        if (Util.getOperatingSystem() == Util.OperatingSystem.LINUX) {
             String session = System.getenv("XDG_SESSION_TYPE");
 
             if (Objects.equals(session, "wayland")) {

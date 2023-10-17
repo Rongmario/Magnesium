@@ -12,7 +12,7 @@ import static net.minecraft.client.render.RenderLayer.*;
 @Mixin(RenderLayer.class)
 public class MixinRenderLayer {
 
-    private static final List<RenderLayer> layers =  ImmutableList.of(getSolid(), getCutoutMipped(), getCutout(), getTranslucent(), getTripwire());;
+    private static final List<RenderLayer> layers = ImmutableList.of(getSolid(), getCutoutMipped(), getCutout(), getTranslucent(), getTripwire());
 
     @Overwrite
     public static List<RenderLayer> getBlockLayers() {

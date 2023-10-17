@@ -14,9 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BlockColors.class)
 public class MixinBlockColors implements BlockColorsExtended {
-    private Reference2ReferenceMap<Block, BlockColorProvider> blocksToColor;
-
     private static final BlockColorProvider DEFAULT_PROVIDER = (state, view, pos, tint) -> -1;
+    private Reference2ReferenceMap<Block, BlockColorProvider> blocksToColor;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
@@ -27,8 +26,8 @@ public class MixinBlockColors implements BlockColorsExtended {
     @Inject(method = "registerColorProvider", at = @At("HEAD"))
     private void preRegisterColor(BlockColorProvider provider, Block[] blocks, CallbackInfo ci) {
         for (Block block : blocks) {
-        	if(provider != null)
-        		this.blocksToColor.put(block, provider);
+            if (provider != null)
+                this.blocksToColor.put(block, provider);
         }
     }
 

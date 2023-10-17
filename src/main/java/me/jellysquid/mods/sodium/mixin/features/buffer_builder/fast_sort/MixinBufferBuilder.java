@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.fast_sort;
 
 import com.google.common.primitives.Floats;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -16,79 +16,13 @@ import java.util.BitSet;
 @Mixin(BufferBuilder.class)
 public class MixinBufferBuilder {
     @Shadow
-    private ByteBuffer buffer;
+    private ByteBuffer byteBuffer;
 
     @Shadow
     private int vertexCount;
 
     @Shadow
-    private VertexFormat format;
-
-    @Shadow
-    private int buildStart;
-
-    /**
-     * @reason Reduce allocations, use stack allocations, avoid unnecessary math and pointer bumping, inline comparators
-     * @author JellySquid
-     */
-    @Overwrite
-    public void sortQuads(float cameraX, float cameraY, float cameraZ) {
-        this.buffer.clear();
-        FloatBuffer floatBuffer = this.buffer.asFloatBuffer();
-
-        int vertexStride = this.format.getVertexSize();
-        int quadStride = this.format.getVertexSizeInteger() * 4;
-
-        int quadStart = this.buildStart / 4;
-        int quadCount = this.vertexCount / 4;
-        int vertexSizeInteger = this.format.getVertexSizeInteger();
-
-        float[] distanceArray = new float[quadCount];
-        int[] indicesArray = new int[quadCount];
-
-        for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
-            distanceArray[quadIdx] = getDistanceSq(floatBuffer, cameraX, cameraY, cameraZ, vertexSizeInteger, quadStart + (quadIdx * vertexStride));
-            indicesArray[quadIdx] = quadIdx;
-        }
-
-        mergeSort(indicesArray, distanceArray);
-
-        BitSet bits = new BitSet();
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer tmp = stack.mallocFloat(vertexSizeInteger * 4);
-
-            for (int l = bits.nextClearBit(0); l < indicesArray.length; l = bits.nextClearBit(l + 1)) {
-                int m = indicesArray[l];
-
-                if (m != l) {
-                    sliceQuad(floatBuffer, m, quadStride, quadStart);
-                    tmp.clear();
-                    tmp.put(floatBuffer);
-
-                    int n = m;
-
-                    for (int o = indicesArray[m]; n != l; o = indicesArray[o]) {
-                        sliceQuad(floatBuffer, o, quadStride, quadStart);
-                        FloatBuffer floatBuffer3 = floatBuffer.slice();
-
-                        sliceQuad(floatBuffer, n, quadStride, quadStart);
-                        floatBuffer.put(floatBuffer3);
-
-                        bits.set(n);
-                        n = o;
-                    }
-
-                    sliceQuad(floatBuffer, l, quadStride, quadStart);
-                    tmp.flip();
-
-                    floatBuffer.put(tmp);
-                }
-
-                bits.set(l);
-            }
-        }
-    }
+    private VertexFormat vertexFormat;
 
     private static void mergeSort(int[] indicesArray, float[] distanceArray) {
         mergeSort(indicesArray, 0, indicesArray.length, distanceArray, Arrays.copyOf(indicesArray, indicesArray.length));
@@ -174,6 +108,69 @@ public class MixinBufferBuilder {
             }
 
             a[j] = t;
+        }
+    }
+
+    /**
+     * @reason Reduce allocations, use stack allocations, avoid unnecessary math and pointer bumping, inline comparators
+     * @author JellySquid
+     */
+    @Overwrite
+    public void sortVertexData(float cameraX, float cameraY, float cameraZ) {
+        this.byteBuffer.clear();
+        FloatBuffer floatBuffer = this.byteBuffer.asFloatBuffer();
+
+        int vertexStride = this.vertexFormat.getSize();
+        int quadStride = this.vertexFormat.getIntegerSize() * 4;
+
+        int quadStart = 0;
+        int quadCount = this.vertexCount / 4;
+        int vertexSizeInteger = this.vertexFormat.getIntegerSize();
+
+        float[] distanceArray = new float[quadCount];
+        int[] indicesArray = new int[quadCount];
+
+        for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
+            distanceArray[quadIdx] = getDistanceSq(floatBuffer, cameraX, cameraY, cameraZ, vertexSizeInteger, quadStart + (quadIdx * vertexStride));
+            indicesArray[quadIdx] = quadIdx;
+        }
+
+        mergeSort(indicesArray, distanceArray);
+
+        BitSet bits = new BitSet();
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer tmp = stack.mallocFloat(vertexSizeInteger * 4);
+
+            for (int l = bits.nextClearBit(0); l < indicesArray.length; l = bits.nextClearBit(l + 1)) {
+                int m = indicesArray[l];
+
+                if (m != l) {
+                    sliceQuad(floatBuffer, m, quadStride, quadStart);
+                    tmp.clear();
+                    tmp.put(floatBuffer);
+
+                    int n = m;
+
+                    for (int o = indicesArray[m]; n != l; o = indicesArray[o]) {
+                        sliceQuad(floatBuffer, o, quadStride, quadStart);
+                        FloatBuffer floatBuffer3 = floatBuffer.slice();
+
+                        sliceQuad(floatBuffer, n, quadStride, quadStart);
+                        floatBuffer.put(floatBuffer3);
+
+                        bits.set(n);
+                        n = o;
+                    }
+
+                    sliceQuad(floatBuffer, l, quadStride, quadStart);
+                    tmp.flip();
+
+                    floatBuffer.put(tmp);
+                }
+
+                bits.set(l);
+            }
         }
     }
 

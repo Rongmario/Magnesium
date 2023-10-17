@@ -7,7 +7,6 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.model.data.IModelData;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,7 +19,7 @@ import java.util.function.Predicate;
 
 @Mixin(MultipartBakedModel.class)
 public class MixinMultipartBakedModel {
-	private final Map<BlockState, BakedModel[]> stateCacheFast = new Reference2ReferenceOpenHashMap<>();
+    private final Map<BlockState, BakedModel[]> stateCacheFast = new Reference2ReferenceOpenHashMap<>();
     private final StampedLock lock = new StampedLock();
 
     @Shadow
@@ -45,7 +44,7 @@ public class MixinMultipartBakedModel {
         } finally {
             this.lock.unlockRead(readStamp);
         }
-        
+
         if (models == null) {
             long writeStamp = this.lock.writeLock();
             try {

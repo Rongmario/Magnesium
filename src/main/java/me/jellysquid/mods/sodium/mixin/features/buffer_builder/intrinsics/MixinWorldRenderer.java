@@ -1,39 +1,26 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.intrinsics;
 
-import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
-import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
-import me.jellysquid.mods.sodium.client.model.vertex.formats.line.LineVertexSink;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
-import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.renderer.RenderGlobal;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(WorldRenderer.class)
+@Mixin(RenderGlobal.class)
 public class MixinWorldRenderer {
     /**
      * @author JellySquid
      * @reason Use intrinsics where possible to speed up vertex writing
      */
+    /*
     @Overwrite
-    public static void drawBox(MatrixStack matrices, VertexConsumer vertexConsumer, double x1, double y1, double z1,
-                               double x2, double y2, double z2, float red, float green, float blue, float alpha,
-                               float xAxisRed, float yAxisGreen, float zAxisBlue) {
-        Matrix4f model = matrices.peek().getModel();
+    public static void drawBoundingBox(BufferBuilder buffer, double minX, double minY, double minZ, double maxX, double maxY, double maxZ, float red, float green, float blue, float alpha) {
 
-        float x1f = (float) x1;
-        float y1f = (float) y1;
-        float z1f = (float) z1;
-        float x2f = (float) x2;
-        float y2f = (float) y2;
-        float z2f = (float) z2;
+        float x1f = (float) minX;
+        float y1f = (float) minY;
+        float z1f = (float) minZ;
+        float x2f = (float) maxX;
+        float y2f = (float) maxY;
+        float z2f = (float) maxZ;
 
         int color = ColorABGR.pack(red, green, blue, alpha);
-
         Matrix4fExtended matrixExt = MatrixUtil.getExtendedMatrix(model);
 
         float v1x = matrixExt.transformVecX(x1f, y1f, z1f);
@@ -110,5 +97,6 @@ public class MixinWorldRenderer {
 
         lines.flush();
     }
+     */
 
 }

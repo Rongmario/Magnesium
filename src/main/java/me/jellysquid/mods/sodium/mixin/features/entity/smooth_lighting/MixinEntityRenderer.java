@@ -5,10 +5,17 @@ import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import me.jellysquid.mods.sodium.client.model.light.EntityLighter;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.entity.EntityLightSampler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,35 +24,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
 public abstract class MixinEntityRenderer<T extends Entity> implements EntityLightSampler<T> {
-    @Shadow
-    protected abstract int getBlockLight(T entity, BlockPos blockPos);
+    //Moved to Entity
 
-    @Shadow(remap = false)
-    protected abstract int func_239381_b_(T entity, BlockPos blockPos);
-
-    @Inject(method = "getLight", at = @At("HEAD"), cancellable = true)
-    private void preGetLight(T entity, float tickDelta, CallbackInfoReturnable<Integer> cir) {
-        // Use smooth entity lighting if enabled
-        if (SodiumClientMod.options().quality.smoothLighting == SodiumGameOptions.LightingQuality.HIGH) {
-            cir.setReturnValue(EntityLighter.getBlendedLight(this, entity, tickDelta));
-        }
-    }
-
-    @Inject(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Frustum;isVisible(Lnet/minecraft/util/math/Box;)Z", shift = At.Shift.AFTER), cancellable = true)
-    private void preShouldRender(T entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
-        // If the entity isn't culled already by other means, try to perform a second pass
-        if (cir.getReturnValue() && !SodiumWorldRenderer.getInstance().isEntityVisible(entity)) {
-            cir.setReturnValue(false);
-        }
-    }
 
     @Override
     public int bridge$getBlockLight(T entity, BlockPos pos) {
-        return this.getBlockLight(entity, pos);
+
+        return this.getBlockLightLevel(entity, pos);
     }
 
     @Override
     public int bridge$getSkyLight(T entity, BlockPos pos) {
-        return this.func_239381_b_(entity, pos);
+        return this.getSkyLightLevel(entity, pos);
     }
+    protected int getBlockLightLevel(T entity, BlockPos pos) {
+        return entity.isBurning() ? 15 : entity.world.getLightFor(EnumSkyBlock.BLOCK, pos);
+    }
+
+    protected int getSkyLightLevel(T entity, BlockPos pos) {
+        return entity.world.getLightFor(EnumSkyBlock.SKY, pos);
+    }
+
 }

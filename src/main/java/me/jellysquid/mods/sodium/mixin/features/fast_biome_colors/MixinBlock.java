@@ -1,18 +1,19 @@
 package me.jellysquid.mods.sodium.mixin.features.fast_biome_colors;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
-import org.spongepowered.asm.mixin.Mixin;
-
 import me.jellysquid.mods.sodium.client.model.quad.blender.BlockColorSettings;
 import me.jellysquid.mods.sodium.client.model.quad.blender.DefaultBlockColorSettings;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.IBlockAccess;
+import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Block.class)
-public class MixinBlock implements BlockColorSettings<BlockState> {
+public class MixinBlock implements BlockColorSettings<IBlockState> {
     @Override
-    public boolean useSmoothColorBlending(BlockRenderView view, BlockState state, BlockPos pos) {
+    public boolean useSmoothColorBlending(IBlockAccess view, IBlockState state, BlockPos pos) {
         return DefaultBlockColorSettings.isSmoothBlendingAvailable(state.getBlock());
     }
 }

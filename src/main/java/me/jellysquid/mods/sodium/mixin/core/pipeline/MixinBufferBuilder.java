@@ -24,39 +24,35 @@ import java.nio.ByteBuffer;
 @Mixin(BufferBuilder.class)
 public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrain {
     @Shadow
-    private int elementOffset;
-
-    @Shadow
-    private ByteBuffer buffer;
-
-    @Shadow
     @Final
     private static Logger LOGGER;
+    @Shadow
+    private int elementOffset;
+    @Shadow
+    private ByteBuffer buffer;
+    @Shadow
+    private VertexFormat format;
+    @Shadow
+    private int vertexCount;
 
     @Shadow
     private static int roundBufferSize(int amount) {
         throw new UnsupportedOperationException();
     }
 
-    @Shadow
-    private VertexFormat format;
-
-    @Shadow
-    private int vertexCount;
-
     @Redirect(method = "popData", at = @At(value = "INVOKE", target = "Ljava/nio/Buffer;limit(I)Ljava/nio/Buffer;"))
     public Buffer debugGetNextBuffer(Buffer buffer, int newLimit) {
         ensureBufferCapacity(newLimit);
-        buffer = (Buffer) this.buffer;
+        buffer = this.buffer;
         buffer.limit(newLimit);
         return buffer;
     }
-    
+
     @Override
     public boolean ensureBufferCapacity(int bytes) {
-    	if(format == null)
-    		return false;
-    	
+        if (format == null)
+            return false;
+
         // Ensure that there is always space for 1 more vertex; see BufferBuilder.next()
         bytes += format.getVertexSize();
 
@@ -108,7 +104,7 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
     public <T extends VertexSink> T createSink(VertexType<T> factory) {
         BlittableVertexType<T> blittable = factory.asBlittable();
 
-        if (blittable != null && blittable.getBufferVertexFormat() == this.getVertexFormat())  {
+        if (blittable != null && blittable.getBufferVertexFormat() == this.getVertexFormat()) {
             return blittable.createBufferWriter(this, SodiumClientMod.isDirectMemoryAccessEnabled());
         }
 

@@ -9,7 +9,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.registries.IRegistryDelegate;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,9 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemColors.class)
 public class MixinItemColors implements ItemColorsExtended {
-    private Reference2ReferenceMap<IRegistryDelegate<Item>, ItemColorProvider> itemsToColor;
-
     private static final ItemColorProvider DEFAULT_PROVIDER = (stack, tintIdx) -> -1;
+    private Reference2ReferenceMap<IRegistryDelegate<Item>, ItemColorProvider> itemsToColor;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(CallbackInfo ci) {

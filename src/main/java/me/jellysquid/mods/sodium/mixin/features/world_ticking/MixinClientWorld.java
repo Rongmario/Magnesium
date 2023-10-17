@@ -27,13 +27,13 @@ import java.util.function.Supplier;
 // Priority for compatibility with AbnormalsCore/BetterFoliage
 @Mixin(value = ClientWorld.class, priority = 990)
 public abstract class MixinClientWorld extends World {
-    @Shadow
-    protected abstract void addParticle(BlockPos pos, BlockState state, ParticleEffect parameters, boolean bl);
-
     protected MixinClientWorld(MutableWorldProperties mutableWorldProperties, RegistryKey<World> registryKey,
                                DimensionType dimensionType, Supplier<Profiler> profiler, boolean bl, boolean bl2, long l) {
         super(mutableWorldProperties, registryKey, dimensionType, profiler, bl, bl2, l);
     }
+
+    @Shadow
+    protected abstract void addParticle(BlockPos pos, BlockState state, ParticleEffect parameters, boolean bl);
 
     @Redirect(method = "doRandomBlockDisplayTicks", at = @At(value = "NEW", target = "java/util/Random"))
     private Random redirectRandomTickRandom() {

@@ -72,17 +72,17 @@ public class MixinMatrix4f implements Matrix4fExtended {
 
     @Override
     public float transformVecX(float x, float y, float z) {
-        return (this.a00 * x) + (this.a01 * y) + (this.a02 * z) + (this.a03 * 1.0f);
+        return (this.a00 * x) + (this.a01 * y) + (this.a02 * z) + (this.a03);
     }
 
     @Override
     public float transformVecY(float x, float y, float z) {
-        return (this.a10 * x) + (this.a11 * y) + (this.a12 * z) + (this.a13 * 1.0f);
+        return (this.a10 * x) + (this.a11 * y) + (this.a12 * z) + (this.a13);
     }
 
     @Override
     public float transformVecZ(float x, float y, float z) {
-        return (this.a20 * x) + (this.a21 * y) + (this.a22 * z) + (this.a23 * 1.0f);
+        return (this.a20 * x) + (this.a21 * y) + (this.a22 * z) + (this.a23);
     }
 
     @Override
@@ -273,8 +273,8 @@ public class MixinMatrix4f implements Matrix4fExtended {
     private void writeToBufferUnsafe(FloatBuffer buf) {
         long addr = MemoryUtil.memAddress(buf);
 
-        MemoryUtil.memPutFloat(addr + 0, this.a00);
-        MemoryUtil.memPutFloat(addr + 0, this.a00);
+        MemoryUtil.memPutFloat(addr, this.a00);
+        MemoryUtil.memPutFloat(addr, this.a00);
         MemoryUtil.memPutFloat(addr + 4, this.a10);
         MemoryUtil.memPutFloat(addr + 8, this.a20);
         MemoryUtil.memPutFloat(addr + 12, this.a30);

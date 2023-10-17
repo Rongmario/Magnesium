@@ -23,16 +23,15 @@ public abstract class MixinSprite implements SpriteExtended {
 
     @Shadow
     private int frameIndex;
+    @Shadow
+    @Final
+    private Sprite.Interpolation interpolation;
 
     @Shadow
     public abstract int getFrameCount();
 
     @Shadow
     protected abstract void upload(int int_1);
-
-    @Shadow
-    @Final
-    private Sprite.Interpolation interpolation;
 
     /**
      * @author JellySquid

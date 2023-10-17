@@ -2,10 +2,19 @@ package me.jellysquid.mods.sodium.mixin.features.gui;
 
 import com.google.common.base.Strings;
 import com.mojang.blaze3d.systems.RenderSystem;
+import me.jellysquid.mods.sodium.compat.client.renderer.CompatRenderSystem;
+import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL20C;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiOverlayDebug;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.render.*;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 import org.apache.commons.lang3.Validate;
@@ -20,19 +29,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(DebugHud.class)
+@Mixin(GuiOverlayDebug.class)
 public abstract class MixinDebugHud {
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft mc;
 
     @Shadow
     @Final
-    private TextRenderer fontRenderer;
+    private FontRenderer fontRenderer;
 
     private List<String> capturedList = null;
 
-    @Redirect(method = { "renderLeftText", "renderRightText" }, at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    @Redirect(method = {"renderDebugInfoLeft", "renderDebugInfoRight"}, at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
     private int preRenderText(List<String> list) {
         // Capture the list to be rendered later
         this.capturedList = list;
@@ -40,52 +49,45 @@ public abstract class MixinDebugHud {
         return 0; // Prevent the rendering of any text
     }
 
-    @Inject(method = "renderLeftText", at = @At("RETURN"))
-    public void renderLeftText(MatrixStack matrixStack, CallbackInfo ci) {
-        this.renderCapturedText(matrixStack, false);
+    @Inject(method = "renderDebugInfoLeft", at = @At("RETURN"))
+    public void renderLeftText(CallbackInfo ci) {
+        this.renderCapturedText( false);
     }
 
-    @Inject(method = "renderRightText", at = @At("RETURN"))
-    public void renderRightText(MatrixStack matrixStack, CallbackInfo ci) {
-        this.renderCapturedText(matrixStack, true);
+    @Inject(method = "renderDebugInfoRight", at = @At("RETURN"))
+    public void renderRightText(ScaledResolution p_175239_1_, CallbackInfo ci) {
+        this.renderCapturedText( true);
     }
 
-    private void renderCapturedText(MatrixStack matrixStack, boolean right) {
+    private void renderCapturedText( boolean right) {
         Validate.notNull(this.capturedList, "Failed to capture string list");
 
-        this.renderBackdrop(matrixStack, this.capturedList, right);
-        this.renderStrings(matrixStack, this.capturedList, right);
+        this.renderBackdrop( this.capturedList, right);
+        this.renderStrings(this.capturedList, right);
 
         this.capturedList = null;
     }
 
-    private void renderStrings(MatrixStack matrixStack, List<String> list, boolean right) {
-        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-
-        Matrix4f modelMatrix = matrixStack.peek().getModel();
-
+    private void renderStrings(List<String> list, boolean right) {
         for (int i = 0; i < list.size(); ++i) {
             String string = list.get(i);
 
             if (!Strings.isNullOrEmpty(string)) {
                 int height = 9;
-                int width = this.fontRenderer.getWidth(string);
+                int width = this.fontRenderer.getStringWidth(string);
 
-                float x1 = right ? this.client.getWindow().getScaledWidth() - 2 - width : 2;
+                float x1 = right ? this.mc.displayWidth- 2 - width : 2;
                 float y1 = 2 + (height * i);
 
-                this.fontRenderer.draw(string, x1, y1, 0xe0e0e0, false, modelMatrix, immediate,
-                        false, 0, 15728880, this.fontRenderer.isRightToLeft());
+                this.fontRenderer.drawString(string, x1, y1, 0xe0e0e0, false);
             }
         }
-
-        immediate.draw();
     }
 
-    private void renderBackdrop(MatrixStack matrixStack, List<String> list, boolean right) {
-        RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
-        RenderSystem.defaultBlendFunc();
+    private void renderBackdrop( List<String> list, boolean right) {
+        CompatRenderSystem.enableBlend();
+        CompatRenderSystem.disableTexture();
+        CompatRenderSystem.defaultBlendFunc();
 
         int color = 0x90505050;
 
@@ -95,10 +97,8 @@ public abstract class MixinDebugHud {
         float k = (float) (color & 255) / 255.0F;
 
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-        bufferBuilder.begin(GL20C.GL_QUADS, VertexFormats.POSITION_COLOR);
+        bufferBuilder.begin(CompatGL20C.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
-        Matrix4f matrix = matrixStack.peek()
-                .getModel();
 
         for (int i = 0; i < list.size(); ++i) {
             String string = list.get(i);
@@ -108,9 +108,9 @@ public abstract class MixinDebugHud {
             }
 
             int height = 9;
-            int width = this.fontRenderer.getWidth(string);
+            int width = this.fontRenderer.getStringWidth(string);
 
-            int x = right ? this.client.getWindow().getScaledWidth() - 2 - width : 2;
+            int x = right ? this.mc.displayWidth - 2 - width : 2;
             int y = 2 + height * i;
 
             float x1 = x - 1;
@@ -118,16 +118,16 @@ public abstract class MixinDebugHud {
             float x2 = x + width + 1;
             float y2 = y + height - 1;
 
-            bufferBuilder.vertex(matrix, x1, y2, 0.0F).color(g, h, k, f).next();
-            bufferBuilder.vertex(matrix, x2, y2, 0.0F).color(g, h, k, f).next();
-            bufferBuilder.vertex(matrix, x2, y1, 0.0F).color(g, h, k, f).next();
-            bufferBuilder.vertex(matrix, x1, y1, 0.0F).color(g, h, k, f).next();
+            bufferBuilder.pos( x1, y2, 0.0F).color(g, h, k, f).endVertex();
+            bufferBuilder.pos( x2, y2, 0.0F).color(g, h, k, f).endVertex();
+            bufferBuilder.pos( x2, y1, 0.0F).color(g, h, k, f).endVertex();
+            bufferBuilder.pos(x1, y1, 0.0F).color(g, h, k, f).endVertex();
         }
 
-        bufferBuilder.end();
+        bufferBuilder.finishDrawing();
 
-        BufferRenderer.draw(bufferBuilder);
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
+        Tessellator.getInstance().vboUploader.draw(bufferBuilder);
+        CompatRenderSystem.enableTexture();
+        CompatRenderSystem.disableBlend();
     }
 }

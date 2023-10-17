@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.model.vertex;
 
 import me.jellysquid.mods.sodium.client.model.vertex.type.VertexType;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.renderer.BufferBuilder;
 
 /**
  * A drain allows the instantiation of {@link VertexSink} and is implemented on outputs which take vertex data.
@@ -14,7 +15,7 @@ public interface VertexDrain {
      * @param consumer The {@link VertexConsumer}
      * @return A {@link VertexDrain}
      */
-    static VertexDrain of(VertexConsumer consumer) {
+    static VertexDrain of(BufferBuilder consumer) {
         return (VertexDrain) consumer;
     }
 

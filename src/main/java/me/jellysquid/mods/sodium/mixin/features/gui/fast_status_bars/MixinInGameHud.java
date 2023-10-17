@@ -1,11 +1,20 @@
 package me.jellysquid.mods.sodium.mixin.features.gui.fast_status_bars;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiIngame;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.*;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Matrix4f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,48 +22,49 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(InGameHud.class)
-public abstract class MixinInGameHud extends DrawableHelper {
-    @Shadow
-    protected abstract PlayerEntity getCameraPlayer();
-
+@Mixin(GuiIngame.class)
+public abstract class MixinInGameHud extends Gui {
+    @Shadow @Final protected Minecraft mc;
     private final BufferBuilder bufferBuilder = new BufferBuilder(8192);
     // It's possible for status bar rendering to be skipped
     private boolean isRenderingStatusBars;
 
-    @Inject(method = "renderStatusBars", at = @At("HEAD"))
-    private void preRenderStatusBars(MatrixStack matrices, CallbackInfo ci) {
+    private EntityPlayer getCameraPlayer(){
+        return (EntityPlayer) mc.getRenderViewEntity();
+    }
+    @Inject(method = "renderPlayerStats", at = @At("HEAD"))
+    private void preRenderStatusBars(ScaledResolution p_180477_1_, CallbackInfo ci) {
+
         if (this.getCameraPlayer() != null) {
-            this.bufferBuilder.begin(4, VertexFormats.POSITION_TEXTURE);
+            this.bufferBuilder.begin(4, DefaultVertexFormats.POSITION_TEX);
             this.isRenderingStatusBars = true;
         } else {
             this.isRenderingStatusBars = false;
         }
     }
 
-    @Redirect(method = { "renderStatusBars", "drawHeart" }, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;drawTexture(Lnet/minecraft/client/util/math/MatrixStack;IIIIII)V"))
-    private void drawTexture(InGameHud inGameHud, MatrixStack matrices, int x0, int y0, int u, int v, int width, int height) {
-        Matrix4f matrix = matrices.peek().getModel();
-        int x1 = x0 + width;
-        int y1 = y0 + height;
-        int z = this.getZOffset();
+    @Redirect(method = {"renderPlayerStats", "renderMountHealth"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiIngame;drawTexturedModalRect(IIIIII)V"))
+    private void drawTexture(GuiIngame instance, int x, int y, int textureX, int textureY, int width, int height) {
+        int x1 = x + width;
+        int y1 = y + height;
+        float z = zLevel;
         // Default texture size is 256x256
-        float u0 = u / 256f;
-        float u1 = (u + width) / 256f;
-        float v0 = v / 256f;
-        float v1 = (v + height) / 256f;
+        float u0 = textureX / 256f;
+        float u1 = (textureX + width) / 256f;
+        float v0 = textureY / 256f;
+        float v1 = (textureY + height) / 256f;
 
-        this.bufferBuilder.vertex(matrix, x0, y1, z).texture(u0, v1).next();
-        this.bufferBuilder.vertex(matrix, x1, y1, z).texture(u1, v1).next();
-        this.bufferBuilder.vertex(matrix, x1, y0, z).texture(u1, v0).next();
-        this.bufferBuilder.vertex(matrix, x0, y0, z).texture(u0, v0).next();
+        this.bufferBuilder.pos(x, y1, z).tex(u0, v1).endVertex();
+        this.bufferBuilder.pos( x1, y1, z).tex(u1, v1).endVertex();
+        this.bufferBuilder.pos( x1, y, z).tex(u1, v0).endVertex();
+        this.bufferBuilder.pos( x, y, z).tex(u0, v0).endVertex();
     }
 
-    @Inject(method = "renderStatusBars", at = @At("RETURN"))
-    private void renderStatusBars(MatrixStack matrices, CallbackInfo ci) {
-        if (this.isRenderingStatusBars) {            
-            this.bufferBuilder.end();
-            BufferRenderer.draw(this.bufferBuilder);
+    @Inject(method = "renderPlayerStats", at = @At("RETURN"))
+    private void renderStatusBars(ScaledResolution p_180477_1_, CallbackInfo ci) {
+        if (this.isRenderingStatusBars) {
+            this.bufferBuilder.finishDrawing();
+            Tessellator.getInstance().vboUploader.draw(bufferBuilder);
         }
     }
 }

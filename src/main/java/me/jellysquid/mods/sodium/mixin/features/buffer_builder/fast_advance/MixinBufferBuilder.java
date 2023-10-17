@@ -1,47 +1,54 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.fast_advance;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.client.render.*;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.List;
+
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends FixedColorVertexConsumer implements BufferVertexConsumer {
+public abstract class MixinBufferBuilder {
     @Shadow
-    private VertexFormat format;
+    private VertexFormat vertexFormat;
 
     @Shadow
-    private VertexFormatElement currentElement;
+    private VertexFormatElement vertexFormatElement;
 
     @Shadow
-    private int elementOffset;
+    private int vertexCount;
 
     @Shadow
-    private int currentElementId;
+    private int vertexFormatIndex;
+
+    @Shadow
+    public abstract boolean isColorDisabled();
+
+    @Shadow
+    public abstract BufferBuilder color(int red, int green, int blue, int alpha);
 
     /**
      * @author JellySquid
      * @reason Remove modulo operations and recursion
      */
-    @Override
     @Overwrite
-    public void nextElement() {
-        ImmutableList<VertexFormatElement> elements = this.format.getElements();
-
+    public void nextVertexFormatIndex() {
+        List<VertexFormatElement> elements = this.vertexFormat.getElements();
         do {
-            this.elementOffset += this.currentElement.getByteLength();
+            this.vertexCount += this.vertexFormatElement.getSize();
 
             // Wrap around the element pointer without using modulo
-            if (++this.currentElementId >= elements.size()) {
-                this.currentElementId -= elements.size();
+            if (++this.vertexFormatIndex >= elements.size()) {
+                this.vertexFormatIndex -= elements.size();
             }
 
-            this.currentElement = elements.get(this.currentElementId);
-        } while (this.currentElement.getType() == VertexFormatElement.Type.PADDING);
+            this.vertexFormatElement = elements.get(this.vertexFormatIndex);
+        } while (this.vertexFormatElement.getUsage() == VertexFormatElement.EnumUsage.PADDING);
 
-        if (this.colorFixed && this.currentElement.getType() == VertexFormatElement.Type.COLOR) {
-            BufferVertexConsumer.super.color(this.fixedRed, this.fixedGreen, this.fixedBlue, this.fixedAlpha);
+        if (isColorDisabled() && this.vertexFormatElement.getUsage() == VertexFormatElement.EnumUsage.COLOR) {
+            //BufferVertexConsumer.super.color(this.fixedRed, this.fixedGreen, this.fixedBlue, this.fixedAlpha);
         }
     }
 }

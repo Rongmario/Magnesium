@@ -2,8 +2,6 @@ package me.jellysquid.mods.sodium.mixin;
 
 import me.jellysquid.mods.sodium.common.config.Option;
 import me.jellysquid.mods.sodium.common.config.SodiumConfig;
-import net.minecraftforge.fml.loading.FMLLoader;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.ClassNode;
@@ -45,7 +43,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
             return false;
         }
-        
+
         String mixin = mixinClassName.substring(MIXIN_PACKAGE_ROOT.length());
         Option option = this.config.getEffectiveOptionForMixin(mixin);
 
@@ -75,6 +73,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
         return option.isEnabled();
     }
+
     @Override
     public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
 
