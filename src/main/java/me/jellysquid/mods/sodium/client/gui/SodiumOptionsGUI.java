@@ -70,7 +70,6 @@ public class SodiumOptionsGUI extends GuiScreen {
 
         this.rebuildGUIPages();
         this.rebuildGUIOptions();
-        Minecraft.getMinecraft().gameSettings.clouds
         this.undoButton = new EasyButton(buttonId++, new Dim2i(this.width - 211, this.height - 26, 65, 20), new TextComponentTranslation("sodium.options.buttons.undo"), this::undoChanges);
         this.applyButton = new EasyButton(buttonId++, new Dim2i(this.width - 142, this.height - 26, 65, 20), new TextComponentTranslation("sodium.options.buttons.apply"), this::applyChanges);
         this.closeButton = new EasyButton(buttonId++, new Dim2i(this.width - 73, this.height - 26, 65, 20), new TextComponentTranslation("gui.done"), this::onGuiClosed);

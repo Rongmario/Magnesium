@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.model.vertex;
 
 import me.jellysquid.mods.sodium.client.model.vertex.type.VertexType;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.renderer.BufferBuilder;
 
 /**

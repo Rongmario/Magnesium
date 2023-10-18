@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.client.world.cloned;
 
 import it.unimi.dsi.fastutil.longs.Long2ReferenceMap;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
-import net.minecraft.util.math.ChunkSectionPos;
+import me.jellysquid.mods.sodium.compat.util.math.ChunkSectionPos;
 import net.minecraft.world.World;
 
 import java.util.concurrent.ConcurrentLinkedQueue;

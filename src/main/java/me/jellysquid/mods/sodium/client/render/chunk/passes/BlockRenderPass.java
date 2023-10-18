@@ -7,7 +7,7 @@ public enum BlockRenderPass {
     SOLID(CompatRenderLayer.getSolid(), false),
     CUTOUT(CompatRenderLayer.getCutout(), false),
     CUTOUT_MIPPED(CompatRenderLayer.getCutoutMipped(), false),
-    TRANSLUCENT(CompatRenderLayer.getTranslucent(), true)
+    TRANSLUCENT(CompatRenderLayer.getTranslucent(), true);
 
     public static final BlockRenderPass[] VALUES = BlockRenderPass.values();
     public static final int COUNT = VALUES.length;
@@ -31,4 +31,4 @@ public enum BlockRenderPass {
     public void startDrawing() {
         //this.layer.startDrawing();
     }
-    }
+}

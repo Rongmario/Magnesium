@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.util;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.compat.util.math.Direction;
 import me.jellysquid.mods.sodium.compat.util.math.Vector3f;
-import net.minecraft.util.math.Vec3d;
 
 /**
  * Provides some utilities and constants for interacting with vanilla's model quad vertex format.
@@ -38,7 +37,7 @@ public class ModelQuadUtil {
         for (int i = 0; i < NORMALS.length; i++) {
 
             Vector3f temp = DirectionUtil.ALL_DIRECTIONS[i].step();
-            NORMALS[i] = Norm3b.pack(new Vec3d());
+            NORMALS[i] = Norm3b.pack(temp);
         }
     }
 

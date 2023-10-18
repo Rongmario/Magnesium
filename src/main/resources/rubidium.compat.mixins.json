@@ -11,6 +11,6 @@
     "conformVisibility": true
   },
   "client": [
-    "ctm.MixinRegionCache"
+
   ]
 }

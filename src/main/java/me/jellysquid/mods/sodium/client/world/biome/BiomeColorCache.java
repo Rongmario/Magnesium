@@ -2,17 +2,17 @@ package me.jellysquid.mods.sodium.client.world.biome;
 
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
-import net.minecraft.client.MinecraftClient;
+
+import me.jellysquid.mods.sodium.compat.util.math.ChunkSectionPos;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.level.ColorResolver;
+
 
 import java.util.Arrays;
 
 public class BiomeColorCache {
     private static final int BLENDED_COLORS_DIM = 16 + 2 * 2;
 
-    private final ColorResolver resolver;
     private final WorldSlice slice;
 
     private final int[] blendedColors;
@@ -27,10 +27,9 @@ public class BiomeColorCache {
     private final int blendedColorsMinX;
     private final int blendedColorsMinZ;
 
-    public BiomeColorCache(ColorResolver resolver, WorldSlice slice) {
-        this.resolver = resolver;
+    public BiomeColorCache(WorldSlice slice) {
         this.slice = slice;
-        this.radius = MinecraftClient.getInstance().options.biomeBlendRadius;
+        this.radius = 2;
 
         ChunkSectionPos origin = this.slice.getOrigin();
 
@@ -107,6 +106,6 @@ public class BiomeColorCache {
     }
 
     private int calculateColor(int x, int z) {
-        return this.resolver.getColor(this.slice.getBiome(x, this.height, z), x, z);
+        return this.slice.getBiome(x, this.height, z).getFoliageColorAtPos(new BlockPos(x,0,z));
     }
 }

@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.core.compat;
 
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.common.Loader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -24,7 +24,7 @@ public class CompatMixinPlugin implements IMixinConfigPlugin {
         int startIndex = mixinClassName.indexOf("compat.") + "compat.".length();
         int endIndex = mixinClassName.indexOf(".", startIndex);
         String modid = mixinClassName.substring(startIndex, endIndex);
-        return FMLLoader.getLoadingModList().getModFileById(modid) != null;
+        return Loader.instance().getModList().stream().anyMatch(mod -> mod.getModId().equals(modid));
     }
 
     @Override

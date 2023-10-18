@@ -2,8 +2,8 @@ package me.jellysquid.mods.sodium.mixin.core.matrix;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Quaternion;
+import me.jellysquid.mods.sodium.compat.util.math.Matrix4f;
+import me.jellysquid.mods.sodium.compat.util.math.Quaternion;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -257,7 +257,7 @@ public class MixinMatrix4f implements Matrix4fExtended {
      * @reason Optimize
      * @author JellySquid
      */
-    @Overwrite
+    @Overwrite(remap = false)
     public void writeRowFirst(FloatBuffer buf) {
         if (buf.remaining() < 16) {
             throw new BufferUnderflowException();

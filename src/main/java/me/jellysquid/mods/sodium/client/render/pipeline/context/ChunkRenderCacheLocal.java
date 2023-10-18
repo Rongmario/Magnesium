@@ -7,20 +7,21 @@ import me.jellysquid.mods.sodium.client.render.pipeline.BlockRenderer;
 import me.jellysquid.mods.sodium.client.render.pipeline.ChunkRenderCache;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.BlockModels;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockFluidRenderer;
+import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.world.World;
 
 public class ChunkRenderCacheLocal extends ChunkRenderCache {
     private final ArrayLightDataCache lightDataCache;
 
     private final BlockRenderer blockRenderer;
-    private final FluidRenderer fluidRenderer;
+    private final BlockFluidRenderer fluidRenderer;
 
-    private final BlockModels blockModels;
+    private final BlockModelShapes blockModels;
     private final WorldSlice worldSlice;
 
-    public ChunkRenderCacheLocal(MinecraftClient client, World world) {
+    public ChunkRenderCacheLocal(Minecraft client, World world) {
         this.worldSlice = new WorldSlice(world);
         this.lightDataCache = new ArrayLightDataCache(this.worldSlice);
 
@@ -28,12 +29,12 @@ public class ChunkRenderCacheLocal extends ChunkRenderCache {
         BiomeColorBlender biomeColorBlender = this.createBiomeColorBlender();
 
         this.blockRenderer = new BlockRenderer(client, lightPipelineProvider, biomeColorBlender);
-        this.fluidRenderer = new FluidRenderer(client, lightPipelineProvider, biomeColorBlender);
+        this.fluidRenderer = new BlockFluidRenderer(client.getBlockColors());
 
-        this.blockModels = client.getBakedModelManager().getBlockModels();
+        this.blockModels = client.getBlockRendererDispatcher().getBlockModelShapes();
     }
 
-    public BlockModels getBlockModels() {
+    public BlockModelShapes getBlockModels() {
         return this.blockModels;
     }
 
@@ -41,7 +42,7 @@ public class ChunkRenderCacheLocal extends ChunkRenderCache {
         return this.blockRenderer;
     }
 
-    public FluidRenderer getFluidRenderer() {
+    public BlockFluidRenderer getFluidRenderer() {
         return this.fluidRenderer;
     }
 

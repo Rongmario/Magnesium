@@ -49,7 +49,7 @@ public class ChunkProgram extends GlProgram {
 
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
             CompatGlStateManager.uniformMatrix4(this.uModelViewProjectionMatrix, false,
-                    GameRendererContext.getModelViewProjectionMatrix(matrixStack.peek(), memoryStack));
+                    GameRendererContext.getModelViewProjectionMatrix(memoryStack));
         }
     }
 }

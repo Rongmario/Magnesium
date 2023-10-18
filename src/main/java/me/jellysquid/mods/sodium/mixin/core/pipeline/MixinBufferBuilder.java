@@ -7,10 +7,10 @@ import me.jellysquid.mods.sodium.client.model.vertex.VertexSink;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.type.BlittableVertexType;
 import me.jellysquid.mods.sodium.client.model.vertex.type.VertexType;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.util.GlAllocationUtils;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,8 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
+import java.nio.*;
 
 @Mixin(BufferBuilder.class)
 public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrain {
@@ -27,77 +26,84 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
     @Final
     private static Logger LOGGER;
     @Shadow
-    private int elementOffset;
-    @Shadow
-    private ByteBuffer buffer;
-    @Shadow
-    private VertexFormat format;
+    private IntBuffer rawIntBuffer;
+
     @Shadow
     private int vertexCount;
 
-    @Shadow
-    private static int roundBufferSize(int amount) {
-        throw new UnsupportedOperationException();
-    }
 
-    @Redirect(method = "popData", at = @At(value = "INVOKE", target = "Ljava/nio/Buffer;limit(I)Ljava/nio/Buffer;"))
-    public Buffer debugGetNextBuffer(Buffer buffer, int newLimit) {
+    @Shadow
+    private VertexFormat vertexFormat;
+
+    @Shadow
+    private ByteBuffer byteBuffer;
+
+    @Shadow
+    private FloatBuffer rawFloatBuffer;
+
+    @Shadow
+    private ShortBuffer rawShortBuffer;
+
+    @Redirect(method = "getVertexState", at = @At(value = "INVOKE", target = "Ljava/nio/IntBuffer;limit(I)Ljava/nio/Buffer;"))
+    public Buffer debugGetNextBuffer(IntBuffer instance, int newLimit) {
         ensureBufferCapacity(newLimit);
-        buffer = this.buffer;
-        buffer.limit(newLimit);
-        return buffer;
+        this.rawIntBuffer = instance;
+        instance.limit(newLimit);
+        return instance;
     }
 
     @Override
     public boolean ensureBufferCapacity(int bytes) {
-        if (format == null)
+        if (vertexFormat == null)
             return false;
 
         // Ensure that there is always space for 1 more vertex; see BufferBuilder.next()
-        bytes += format.getVertexSize();
+        bytes += vertexFormat.getSize();
 
-        if (this.elementOffset + bytes <= this.buffer.capacity()) {
+        if (this.vertexCount * this.vertexFormat.getSize() + bytes <= this.byteBuffer.capacity()) {
             return false;
         }
 
-        int newSize = this.buffer.capacity() + roundBufferSize(bytes);
+        int newSize = this.byteBuffer.capacity() + MathHelper.roundUp(bytes, 2097152);
 
-        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.buffer.capacity(), newSize);
+        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.byteBuffer.capacity(), newSize);
 
-        this.buffer.position(0);
+        this.byteBuffer.position(0);
 
-        ByteBuffer byteBuffer = GlAllocationUtils.allocateByteBuffer(newSize);
-        byteBuffer.put(this.buffer);
+
+        ByteBuffer byteBuffer = GLAllocation.createDirectByteBuffer(newSize);
+        byteBuffer.put(this.byteBuffer);
         byteBuffer.rewind();
 
-        this.buffer = byteBuffer;
-
+        this.byteBuffer = byteBuffer;
+        this.rawIntBuffer = byteBuffer.asIntBuffer();
+        this.rawFloatBuffer = byteBuffer.asFloatBuffer();
+        this.rawShortBuffer = byteBuffer.asShortBuffer();
         return true;
     }
 
     @Override
     public ByteBuffer getDirectBuffer() {
-        return this.buffer;
+        return this.byteBuffer;
     }
 
     @Override
     public int getWriterPosition() {
-        return this.elementOffset;
+        return this.vertexCount * this.vertexFormat.getSize();
     }
 
     @Override
     public BufferVertexFormat getVertexFormat() {
-        return BufferVertexFormat.from(this.format);
+        return BufferVertexFormat.from(this.vertexFormat);
     }
 
     @Override
     public void flush(int vertexCount, BufferVertexFormat format) {
-        if (BufferVertexFormat.from(this.format) != format) {
-            throw new IllegalStateException("Mis-matched vertex format (expected: [" + format + "], currently using: [" + this.format + "])");
+        if (BufferVertexFormat.from(this.vertexFormat) != format) {
+            throw new IllegalStateException("Mis-matched vertex format (expected: [" + format + "], currently using: [" + this.vertexFormat + "])");
         }
 
         this.vertexCount += vertexCount;
-        this.elementOffset += vertexCount * format.getStride();
     }
 
     @Override
@@ -108,6 +114,6 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
             return blittable.createBufferWriter(this, SodiumClientMod.isDirectMemoryAccessEnabled());
         }
 
-        return factory.createFallbackWriter((VertexConsumer) this);
+        return factory.createFallbackWriter((BufferBuilder) (Object) this);
     }
 }

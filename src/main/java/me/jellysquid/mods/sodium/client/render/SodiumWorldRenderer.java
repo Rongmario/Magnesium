@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render;
 
+import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -26,23 +27,20 @@ import me.jellysquid.mods.sodium.compat.client.renderer.CompatRenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraft.client.render.*;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.culling.ClippingHelper;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.*;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 
-/**
- * Provides an extension to vanilla's {@link WorldRenderer}.
- */
 public class SodiumWorldRenderer implements ChunkStatusListener {
     // We'll keep it to have compatibility with Oculus' older versions
     public static boolean hasChanges = false;
@@ -55,7 +53,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     private double lastCameraX, lastCameraY, lastCameraZ;
     private double lastCameraPitch, lastCameraYaw;
     private boolean useEntityCulling;
-    private ClippingHelper frustum;
+    private Frustum frustum;
     private ChunkRenderManager<?> chunkRenderManager;
     private BlockRenderPassManager renderPassManager;
     private ChunkRenderBackend<?> chunkRenderBackend;
@@ -172,7 +170,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     /**
      * Called prior to any chunk rendering in order to update necessary state.
      */
-    public void updateChunks(ActiveRenderInfo camera, ClippingHelper frustum, boolean hasForcedFrustum, int frame, boolean spectator) {
+    public void updateChunks(ActiveRenderInfo camera, Frustum frustum, boolean hasForcedFrustum, int frame, boolean spectator) {
         this.frustum = frustum;
 
         this.useEntityCulling = SodiumClientMod.options().advanced.useEntityCulling;
@@ -275,7 +273,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.chunkRenderManager.restoreChunks(this.loadedChunkPositions);
     }
 
-    public void renderTileEntities(Long2ObjectMap<SortedSet<DestroyBlockProgress>> blockBreakingProgressions,
+    public void renderTileEntities(Long2ObjectMap<DestroyBlockProgress> blockBreakingProgressions,
                                    ActiveRenderInfo camera, float tickDelta) {
         // VertexConsumerProvider.Immediate immediate = bufferBuilders.getEntityVertexConsumers();
         Vec3d cameraPos = ActiveRenderInfo.getCameraPosition();
@@ -288,10 +286,10 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
             GlStateManager.pushMatrix();
             GlStateManager.translate((double) pos.getX() - x, (double) pos.getY() - y, (double) pos.getZ() - z);
 
-            SortedSet<DestroyBlockProgress> breakingInfos = blockBreakingProgressions.get(pos.toLong());
+            Set<DestroyBlockProgress> breakingInfos = Sets.newHashSet(blockBreakingProgressions.get(pos.toLong()));
 
             if (breakingInfos != null && !breakingInfos.isEmpty()) {
-                int stage = breakingInfos.last().getPartialBlockDamage();
+                int stage = breakingInfos.iterator().next().getPartialBlockDamage();
 
                 if (stage >= 0) {
 
@@ -387,7 +385,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     /**
      * @return The frustum of the current player's camera used to cull chunks
      */
-    public ClippingHelper getFrustum() {
+    public Frustum getFrustum() {
         return this.frustum;
     }
 

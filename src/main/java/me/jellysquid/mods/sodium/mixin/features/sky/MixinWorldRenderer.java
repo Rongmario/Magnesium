@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.sky;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;

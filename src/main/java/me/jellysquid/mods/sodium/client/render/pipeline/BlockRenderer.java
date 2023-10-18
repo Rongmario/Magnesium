@@ -84,7 +84,7 @@ public class BlockRenderer {
             }
 
             if (!cull) {
-                this.renderQuadList(world, state, pos, lighter, buffers, sided, dir);
+                this.renderQuadList(world, state, pos, lighter,new Vec3d(0,0,0), buffers, sided, dir);
 
                 rendered = true;
             }
@@ -92,10 +92,10 @@ public class BlockRenderer {
 
         this.random.setSeed(seed);
 
-        List<BakedQuad> all = model.getQuads(state, null, this.random);
+        List<BakedQuad> all = model.getQuads(state, null, this.random.nextLong());
 
         if (!all.isEmpty()) {
-            this.renderQuadList(world, state, pos, lighter, buffers, all, null);
+            this.renderQuadList(world, state, pos, lighter,new Vec3d(0,0,0), buffers, all, null);
 
             rendered = true;
         }

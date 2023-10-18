@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.ViewFrustum;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.ClippingHelperImpl;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
@@ -27,7 +28,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedSet;
 
 @Mixin(RenderGlobal.class)
 public abstract class MixinWorldRenderer {
@@ -114,7 +117,7 @@ public abstract class MixinWorldRenderer {
         RenderDevice.enterManagedCode();
 
         try {
-            this.renderer.updateChunks(null, ClippingHelperImpl.getInstance(), true, frameCount, playerSpectator);
+            this.renderer.updateChunks(null,(Frustum) camera, true, frameCount, playerSpectator);
         } finally {
             RenderDevice.exitManagedCode();
         }
@@ -154,7 +157,20 @@ public abstract class MixinWorldRenderer {
 
     @Inject(method = "renderEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;setTileEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
     private void onRenderTileEntities(Entity entity, ICamera camera, float tickDelta, CallbackInfo ci) {
-        this.renderer.renderTileEntities(new Long2ObjectOpenHashMap<>(damagedBlocks), null, tickDelta);
+        long[] keys = new long[damagedBlocks.size()];
+        DestroyBlockProgress[] values = new DestroyBlockProgress[damagedBlocks.size()];
+
+        Iterator<Map.Entry<Integer, DestroyBlockProgress>> it = damagedBlocks.entrySet().iterator();
+
+        int i = 0;
+
+        while (it.hasNext()){
+            Map.Entry<Integer, DestroyBlockProgress> entry = it.next();
+            keys[i] = entry.getKey().longValue();
+            values[i] = entry.getValue();
+        }
+
+        this.renderer.renderTileEntities(new Long2ObjectOpenHashMap<DestroyBlockProgress>(keys,values), null, tickDelta);
     }
 
     /**

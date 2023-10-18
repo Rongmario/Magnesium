@@ -1,11 +1,11 @@
 package me.jellysquid.mods.sodium.client.model.vertex.formats.particle;
 
 import me.jellysquid.mods.sodium.client.model.vertex.VertexSink;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 
 public interface ParticleVertexSink extends VertexSink {
-    VertexFormat VERTEX_FORMAT = VertexFormats.POSITION_TEXTURE_COLOR_LIGHT;
+    VertexFormat VERTEX_FORMAT = DefaultVertexFormats.POSITION_TEX_LMAP_COLOR;
 
     /**
      * @param x     The x-position of the vertex

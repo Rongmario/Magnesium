@@ -6,10 +6,9 @@ import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
 import me.jellysquid.mods.sodium.compat.util.math.Direction;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.WorldRenderer;
+
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+
 
 import java.util.Arrays;
 

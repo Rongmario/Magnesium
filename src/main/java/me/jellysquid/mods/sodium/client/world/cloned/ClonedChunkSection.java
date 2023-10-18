@@ -14,6 +14,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IBlockStatePalette;
 import net.minecraft.world.chunk.NibbleArray;
@@ -47,9 +48,8 @@ public class ClonedChunkSection {
         this.lightDataArrays = new NibbleArray[LIGHT_TYPES.length];
     }
 
-    private static ClonedPalette<IBlockState> copyPalette(PalettedContainerExtended<IBlockState> container) {
+    private static ClonedPalette<IBlockState> copyPalette(PalettedContainerExtended<BlockStateContainer> container) {
         IBlockStatePalette palette = container.getPalette();
-
         IBlockState[] array = new IBlockState[1 << container.getPaletteSize()];
 
         for (int i = 0; i < array.length; i++) {
@@ -60,10 +60,10 @@ public class ClonedChunkSection {
             }
         }
 
-        return new ClonedPalleteArray<>(array, container.getDefaultValue());
+        return new ClonedPalleteArray<IBlockState>(array, container.getDefaultValue().get(0, 0, 0));
     }
 
-    private static BitArray copyBlockData(PalettedContainerExtended<IBlockState> container) {
+    private static BitArray copyBlockData(PalettedContainerExtended<BlockStateContainer> container) {
         BitArray array = container.getDataArray();
         long[] storage = array.getBackingLongArray();
 
@@ -99,13 +99,12 @@ public class ClonedChunkSection {
 
         ExtendedBlockStorage section = getChunkSection(chunk, pos);
 
-        if (section == Chunk.NULL_BLOCK_STORAGE /*ChunkSection.isEmpty(section)*/) {
+        if (section == Chunk.NULL_BLOCK_STORAGE || section.isEmpty()) {
             section = EMPTY_SECTION;
         }
 
         this.pos = pos;
-
-        PalettedContainerExtended<IBlockState> container = PalettedContainerExtended.cast(section.getContainer());
+        PalettedContainerExtended<BlockStateContainer> container = PalettedContainerExtended.cast(section.getData());
 
         this.blockStateData = copyBlockData(container);
         this.blockStatePalette = copyPalette(container);

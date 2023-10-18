@@ -9,12 +9,14 @@ public final class CompatRenderLayer {
     private static final CompatRenderLayer CUTOUT_MIPPED = create(BlockRenderLayer.CUTOUT_MIPPED, DefaultVertexFormats.BLOCK, 7, 131072, true, false);
     private static final CompatRenderLayer CUTOUT = create(BlockRenderLayer.CUTOUT, DefaultVertexFormats.BLOCK, 7, 131072, true, false);
     private static final CompatRenderLayer TRANSLUCENT = create(BlockRenderLayer.TRANSLUCENT, DefaultVertexFormats.BLOCK, 7, 262144, true, true);
+
     private final BlockRenderLayer type;
     private final VertexFormat format;
     private final int mode;
     private final int bufferSize;
     private final boolean affectsCrumbling;
     private final boolean sortOnUpload;
+
     private CompatRenderLayer(BlockRenderLayer type, VertexFormat format, int mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload) {
         this.type = type;
         this.format = format;
@@ -56,6 +58,14 @@ public final class CompatRenderLayer {
 
     public static CompatRenderLayer create(BlockRenderLayer type, VertexFormat format, int mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload) {
         return new CompatRenderLayer(type, format, mode, bufferSize, affectsCrumbling, sortOnUpload);
+    }
+
+    public static CompatRenderLayer[] getBlockLayers() {
+        return new CompatRenderLayer[]{getSolid(), getCutout(), getCutoutMipped(), getTranslucent()};
+    }
+
+    public int getExpectedBufferSize() {
+        return bufferSize;
     }
 
 

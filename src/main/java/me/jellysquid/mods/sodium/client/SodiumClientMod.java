@@ -2,24 +2,26 @@ package me.jellysquid.mods.sodium.client;
 
 
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.nio.file.Paths;
 
 @Mod(modid = SodiumClientMod.MODID)
 public class SodiumClientMod {
     public static final String MODID = "rubidium";
-    public static final boolean flywheelLoaded = FMLLoader.getLoadingModList().getModFileById("flywheel") != null;
-    public static final boolean cclLoaded = FMLLoader.getLoadingModList().getModFileById("codechickenlib") != null;
+    public static final boolean flywheelLoaded = false;
+    public static final boolean cclLoaded = false;
     private static final Logger LOGGER = LogManager.getLogger("Rubidium");
     private static SodiumGameOptions CONFIG;
     private static String MOD_VERSION;
 
     public SodiumClientMod() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
-
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+        // FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
+        // ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
     }
 
     public static SodiumGameOptions options() {
@@ -35,7 +37,8 @@ public class SodiumClientMod {
     }
 
     private static SodiumGameOptions loadConfig() {
-        return SodiumGameOptions.load(FMLPaths.CONFIGDIR.get().resolve(MODID + "-options.json"));
+
+        return SodiumGameOptions.load(Paths.get(Loader.instance().getConfigDir().getAbsolutePath(), MODID + "-options.json"));
     }
 
     public static String getVersion() {
@@ -50,11 +53,9 @@ public class SodiumClientMod {
         return options().advanced.allowDirectMemoryAccess;
     }
 
-    public void onInitializeClient(final FMLClientSetupEvent event) {
-        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
+    @Mod.EventHandler
+    public void onInitializeClient(final FMLInitializationEvent event) {
+        MOD_VERSION = "1.0.0";
 
-        if (cclLoaded) {
-            CCLCompat.init();
-        }
     }
 }

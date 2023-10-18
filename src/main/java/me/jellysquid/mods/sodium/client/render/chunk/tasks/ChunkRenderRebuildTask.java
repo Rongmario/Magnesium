@@ -110,14 +110,15 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                         }
                     }
                      */
-                    if (blockState.hasTileEntity()) {
+
+                    if (slice.getTileEntity(pos) != null) {
                         TileEntity entity = slice.getBlockEntity(pos);
 
                         if (entity != null) {
 
                             TileEntitySpecialRenderer<TileEntity> renderer = TileEntityRendererDispatcher.instance.getRenderer(entity);
                             if (renderer != null) {
-                                renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
+                                renderData.addBlockEntity(entity, !renderer.isGlobalRenderer(entity));
 
                                 bounds.addBlock(relX, relY, relZ);
                             }

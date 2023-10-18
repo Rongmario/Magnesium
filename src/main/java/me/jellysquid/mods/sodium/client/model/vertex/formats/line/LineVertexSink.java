@@ -2,11 +2,11 @@ package me.jellysquid.mods.sodium.client.model.vertex.formats.line;
 
 import me.jellysquid.mods.sodium.client.model.vertex.VertexSink;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 
 public interface LineVertexSink extends VertexSink {
-    VertexFormat VERTEX_FORMAT = VertexFormats.POSITION_COLOR;
+    VertexFormat VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
 
     /**
      * Writes a line vertex to the sink.

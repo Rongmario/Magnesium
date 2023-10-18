@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.common.config;
 
-import net.minecraftforge.fml.loading.FMLLoader;
+
+import net.minecraftforge.fml.common.Loader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +57,7 @@ public class SodiumConfig {
         this.addMixinRule("features.world_ticking", true);
         this.addMixinRule("features.fast_biome_colors", true);
 
-        if (FMLLoader.getLoadingModList().getModFileById("seamless_loading_screen") != null) {
+        if (Loader.instance().getModList().stream().anyMatch(m -> m.getModId().equals("seamless_loading_screen"))) {
             this.options.get("mixin.features.gui.fast_loading_screen").addModOverride(false, "seamless_loading_screen");
         }
     }

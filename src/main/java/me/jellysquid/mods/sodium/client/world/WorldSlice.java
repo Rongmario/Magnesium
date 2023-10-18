@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCache;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeColorCache;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
@@ -24,10 +23,7 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraft.world.level.ColorResolver;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 /**
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread
@@ -50,7 +46,7 @@ public class WorldSlice implements IBlockAccess {
     private static final int NEIGHBOR_BLOCK_RADIUS = 2;
 
     // The radius of chunks around the origin chunk that should be copied.
-    private static final int NEIGHBOR_CHUNK_RADIUS = MathHelper.roundUpToMultiple(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
+    private static final int NEIGHBOR_CHUNK_RADIUS = MathHelper.roundUp(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
 
     // The number of sections on each axis of this slice.
     private static final int SECTION_LENGTH = 1 + (NEIGHBOR_CHUNK_RADIUS * 2);
@@ -73,15 +69,15 @@ public class WorldSlice implements IBlockAccess {
 
     // Local Section->BlockState table.
     private final IBlockState[][] blockStatesArrays;
+
     // The biome blend caches for each color resolver type
     // This map is always re-initialized, but the caches themselves are taken from an object pool
-    private final Map<ColorResolver, BiomeColorCache> biomeColorCaches = new Reference2ObjectOpenHashMap<>();
-    // Local section copies. Read-only.
-    private ClonedChunkSection[] sections;
+
     // Biome caches for each chunk section
     private final BiomeCache[] biomeCaches;
+    // Local section copies. Read-only.
+    private ClonedChunkSection[] sections;
     // The previously accessed and cached color resolver, used in conjunction with the cached color cache field
-    private ColorResolver prevColorResolver;
 
     // The cached lookup result for the previously accessed color resolver to avoid excess hash table accesses
     // for vertex color blending
@@ -183,9 +179,6 @@ public class WorldSlice implements IBlockAccess {
         this.sections = context.getSections();
 
         this.prevColorCache = null;
-        this.prevColorResolver = null;
-
-        this.biomeColorCaches.clear();
 
         this.baseX = (this.origin.getX() - NEIGHBOR_CHUNK_RADIUS) << 4;
         this.baseY = (this.origin.getY() - NEIGHBOR_CHUNK_RADIUS) << 4;

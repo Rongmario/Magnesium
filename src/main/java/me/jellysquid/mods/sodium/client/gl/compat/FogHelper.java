@@ -2,7 +2,9 @@ package me.jellysquid.mods.sodium.client.gl.compat;
 
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkFogMode;
 import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL20;
-import net.minecraft.client.render.BackgroundRenderer;
+import net.minecraft.client.Minecraft;
+
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 
@@ -58,6 +60,7 @@ public class FogHelper {
     }
 
     public static float[] getFogColor() {
-        return new float[]{BackgroundRenderer.red, BackgroundRenderer.green, BackgroundRenderer.blue, 1.0F};
+        EntityRenderer renderer = Minecraft.getMinecraft().entityRenderer;
+        return new float[]{renderer.fogColorRed, renderer.fogColorGreen, renderer.fogColorBlue, 1.0F};
     }
 }

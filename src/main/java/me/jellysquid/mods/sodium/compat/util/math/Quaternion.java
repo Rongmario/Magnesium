@@ -115,6 +115,23 @@ public class Quaternion {
         return this.r;
     }
 
+    public float getX() {
+        return this.i;
+    }
+
+    public float getY() {
+        return this.j;
+    }
+
+    public float getZ() {
+        return this.k;
+    }
+
+    public float getW() {
+        return this.r;
+    }
+
+
     public void mul(Quaternion p_195890_1_) {
         float f = this.i();
         float f1 = this.j();

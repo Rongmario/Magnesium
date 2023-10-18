@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -69,8 +70,8 @@ public final class CompatGL20C {
         return GL20.glGetShaderInfoLog(shader, GL20.GL_INFO_LOG_LENGTH);
     }
 
-    public static void nglShaderSource() {
-        // GL20.glShaderSource();
+    public static void nglShaderSource(int shader, ByteBuffer string) {
+        GL20.glShaderSource(shader,string);
     }
 
     public static void glDisableVertexAttribArray(int index) {
