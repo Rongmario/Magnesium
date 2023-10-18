@@ -5,8 +5,6 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
 import net.minecraft.client.gui.GuiOverlayDebug;
-import net.minecraft.client.gui.hud.DebugHud;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

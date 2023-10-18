@@ -1,9 +1,8 @@
 package me.jellysquid.mods.sodium.client;
 
 
-import net.minecraftforge.fml.common.Mod;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-
+import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,27 +10,16 @@ import org.apache.logging.log4j.Logger;
 @Mod(modid = SodiumClientMod.MODID)
 public class SodiumClientMod {
     public static final String MODID = "rubidium";
-
-    private static SodiumGameOptions CONFIG;
-    private static final Logger LOGGER = LogManager.getLogger("Rubidium");
-
-    private static String MOD_VERSION;
-    
     public static final boolean flywheelLoaded = FMLLoader.getLoadingModList().getModFileById("flywheel") != null;
     public static final boolean cclLoaded = FMLLoader.getLoadingModList().getModFileById("codechickenlib") != null;
-    
+    private static final Logger LOGGER = LogManager.getLogger("Rubidium");
+    private static SodiumGameOptions CONFIG;
+    private static String MOD_VERSION;
+
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
-        
+
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-    }
-    
-    public void onInitializeClient(final FMLClientSetupEvent event) {
-        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
-    	
-    	if(cclLoaded) {
-    		CCLCompat.init();
-    	}
     }
 
     public static SodiumGameOptions options() {
@@ -57,8 +45,16 @@ public class SodiumClientMod {
 
         return MOD_VERSION;
     }
-    
+
     public static boolean isDirectMemoryAccessEnabled() {
         return options().advanced.allowDirectMemoryAccess;
+    }
+
+    public void onInitializeClient(final FMLClientSetupEvent event) {
+        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
+
+        if (cclLoaded) {
+            CCLCompat.init();
+        }
     }
 }

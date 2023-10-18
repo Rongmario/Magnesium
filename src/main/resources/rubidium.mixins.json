@@ -48,7 +48,7 @@
     "features.item.MixinItemRenderer",
     "features.model.MixinMultipartBakedModel",
     "features.model.MixinWeightedBakedModel",
-    "features.optimized_bamboo.MixinBambooBlock",
+    "features.render_layer.MixinBlock",
     "features.options.MixinGameOptions",
     "features.options.MixinForgeIngameGui",
     "features.options.MixinMinecraftClient",

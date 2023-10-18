@@ -1,49 +1,22 @@
 package me.jellysquid.mods.sodium.mixin.features.render_layer.leaves;
 
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.block.Block;
-import net.minecraft.client.option.GraphicsMode;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.fluid.Fluid;
-import org.spongepowered.asm.mixin.*;
+import net.minecraft.client.settings.GameSettings;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Map;
-
-@Mixin(RenderLayers.class)
+@Mixin(GameSettings.class)
 public class MixinRenderLayers {
-    @Mutable
-    @Shadow
-    @Final
-    private static Map<Block, RenderLayer> BLOCKS;
 
-    @Mutable
-    @Shadow
-    @Final
-    private static Map<Fluid, RenderLayer> FLUIDS;
-    @Unique
-    private static boolean leavesFancy;
-
-    static {
-        // Replace the backing collection types with something a bit faster, since this is a hot spot in chunk rendering.
-        BLOCKS = new Reference2ReferenceOpenHashMap<>(BLOCKS);
-        FLUIDS = new Reference2ReferenceOpenHashMap<>(FLUIDS);
+    @Redirect(method = "setOptionValue", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;fancyGraphics:Z", opcode = Opcodes.PUTFIELD))
+    private static void onSetFancyGraphicsOrBetter(GameSettings instance, boolean value) {
+        instance.fancyGraphics = SodiumClientMod.options().quality.leavesQuality.isFancy(instance);
     }
 
-    @Redirect(
-            method = {"getBlockLayer", "getMovingBlockLayer", "canRenderInLayer"},
-            at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/RenderLayers;fancyGraphicsOrBetter:Z"))
-    private static boolean redirectLeavesShouldBeFancy() {
-        return leavesFancy;
-    }
-
-    @Inject(method = "setFancyGraphicsOrBetter", at = @At("RETURN"))
-    private static void onSetFancyGraphicsOrBetter(boolean fancyGraphicsOrBetter, CallbackInfo ci) {
-        leavesFancy = SodiumClientMod.options().quality.leavesQuality.isFancy(fancyGraphicsOrBetter ? GraphicsMode.FANCY : GraphicsMode.FAST);
+    @Redirect(method = "loadOptions", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;fancyGraphics:Z", opcode = Opcodes.PUTFIELD))
+    private static void onSetFancyGraphicsOrBetter_2(GameSettings instance, boolean value) {
+        instance.fancyGraphics = SodiumClientMod.options().quality.leavesQuality.isFancy(instance);
     }
 }

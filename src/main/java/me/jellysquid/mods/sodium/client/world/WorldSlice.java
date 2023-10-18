@@ -1,36 +1,28 @@
 package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeCache;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeColorCache;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
+import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import me.jellysquid.mods.sodium.compat.util.math.ChunkSectionPos;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BitArray;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.collection.PackedIntegerArray;
-import net.minecraft.util.math.*;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.chunk.*;
-import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.level.ColorResolver;
 import org.jetbrains.annotations.Nullable;
@@ -41,10 +33,10 @@ import java.util.Map;
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread
  * operations. This allows chunk build tasks to see a consistent snapshot of chunk data at the exact moment the task was
  * created.
- *
+ * <p>
  * World slices are not safe to use from multiple threads at once, but the data they contain is safe from modification
  * by the main client thread.
- *
+ * <p>
  * Object pooling should be used to avoid huge allocations as this class contains many large arrays.
  */
 public class WorldSlice implements IBlockAccess {
@@ -81,17 +73,13 @@ public class WorldSlice implements IBlockAccess {
 
     // Local Section->BlockState table.
     private final IBlockState[][] blockStatesArrays;
-
-    // Local section copies. Read-only.
-    private ClonedChunkSection[] sections;
-
-    // Biome caches for each chunk section
-    private BiomeCache[] biomeCaches;
-
     // The biome blend caches for each color resolver type
     // This map is always re-initialized, but the caches themselves are taken from an object pool
     private final Map<ColorResolver, BiomeColorCache> biomeColorCaches = new Reference2ObjectOpenHashMap<>();
-
+    // Local section copies. Read-only.
+    private ClonedChunkSection[] sections;
+    // Biome caches for each chunk section
+    private final BiomeCache[] biomeCaches;
     // The previously accessed and cached color resolver, used in conjunction with the cached color cache field
     private ColorResolver prevColorResolver;
 
@@ -104,6 +92,25 @@ public class WorldSlice implements IBlockAccess {
 
     // The chunk origin of this slice
     private ChunkSectionPos origin;
+
+    public WorldSlice(World world) {
+        this.world = world;
+
+        this.sections = new ClonedChunkSection[SECTION_TABLE_ARRAY_SIZE];
+        this.blockStatesArrays = new IBlockState[SECTION_TABLE_ARRAY_SIZE][];
+        this.biomeCaches = new BiomeCache[SECTION_TABLE_ARRAY_SIZE];
+
+        for (int x = 0; x < SECTION_LENGTH; x++) {
+            for (int y = 0; y < SECTION_LENGTH; y++) {
+                for (int z = 0; z < SECTION_LENGTH; z++) {
+                    int i = getLocalSectionIndex(x, y, z);
+
+                    this.blockStatesArrays[i] = new IBlockState[SECTION_BLOCK_COUNT];
+                    this.biomeCaches[i] = new BiomeCache(this.world);
+                }
+            }
+        }
+    }
 
     public static ChunkRenderContext prepare(World world, ChunkSectionPos origin, ClonedChunkSectionCache sectionCache) {
         Chunk chunk = world.getChunk(origin.getX(), origin.getZ());
@@ -147,23 +154,28 @@ public class WorldSlice implements IBlockAccess {
         return new ChunkRenderContext(origin, sections, volume);
     }
 
-    public WorldSlice(World world) {
-        this.world = world;
+    /**
+     * Helper function to ensure a valid BlockState is always returned (air is returned
+     * in place of null).
+     */
+    private static IBlockState nullableState(IBlockState state) {
+        if (state != null) {
+            return state;
+        } else
+            return NULL_BLOCK_STATE;
+    }
 
-        this.sections = new ClonedChunkSection[SECTION_TABLE_ARRAY_SIZE];
-        this.blockStatesArrays = new IBlockState[SECTION_TABLE_ARRAY_SIZE][];
-        this.biomeCaches = new BiomeCache[SECTION_TABLE_ARRAY_SIZE];
+    // [VanillaCopy] PalettedContainer#toIndex
+    public static int getLocalBlockIndex(int x, int y, int z) {
+        return y << 8 | z << 4 | x;
+    }
 
-        for (int x = 0; x < SECTION_LENGTH; x++) {
-            for (int y = 0; y < SECTION_LENGTH; y++) {
-                for (int z = 0; z < SECTION_LENGTH; z++) {
-                    int i = getLocalSectionIndex(x, y, z);
+    public static int getLocalSectionIndex(int x, int y, int z) {
+        return y << TABLE_BITS << TABLE_BITS | z << TABLE_BITS | x;
+    }
 
-                    this.blockStatesArrays[i] = new IBlockState[SECTION_BLOCK_COUNT];
-                    this.biomeCaches[i] = new BiomeCache(this.world);
-                }
-            }
-        }
+    public static int getLocalChunkIndex(int x, int z) {
+        return z << TABLE_BITS | x;
     }
 
     public void copyData(ChunkRenderContext context) {
@@ -193,7 +205,7 @@ public class WorldSlice implements IBlockAccess {
     }
 
     private void unpackBlockData(IBlockState[] states, ClonedChunkSection section, AxisAlignedBB box) {
-        if (this.origin.equals(section.getPosition()))  {
+        if (this.origin.equals(section.getPosition())) {
             this.unpackBlockDataZ(states, section);
         } else {
             this.unpackBlockDataR(states, section, box);
@@ -230,17 +242,6 @@ public class WorldSlice implements IBlockAccess {
     private void unpackBlockDataZ(IBlockState[] states, ClonedChunkSection section) {
         ((PackedIntegerArrayExtended) section.getBlockData())
                 .copyUsingPalette(states, section.getBlockPalette());
-    }
-
-    /**
-     * Helper function to ensure a valid BlockState is always returned (air is returned
-     * in place of null).
-     */
-    private static IBlockState nullableState(IBlockState state) {
-        if(state != null) {
-            return state;
-        } else
-            return NULL_BLOCK_STATE;
     }
 
     @Nullable
@@ -298,8 +299,6 @@ public class WorldSlice implements IBlockAccess {
                 [getLocalBlockIndex(x & 15, y & 15, z & 15)]);
     }
 
-
-
     public TileEntity getBlockEntity(BlockPos pos) {
         return this.getBlockEntity(pos.getX(), pos.getY(), pos.getZ());
     }
@@ -313,18 +312,13 @@ public class WorldSlice implements IBlockAccess {
                 .getBlockEntity(relX & 15, relY & 15, relZ & 15);
     }
 
-
-
-
     public int getBaseLightLevel(BlockPos pos, int ambientDarkness) {
         return 0;
     }
 
-
     public boolean isSkyVisible(BlockPos pos) {
         return false;
     }
-
 
     /**
      * Gets or computes the biome at the given global coordinates.
@@ -335,28 +329,15 @@ public class WorldSlice implements IBlockAccess {
         int relZ = z - this.baseZ;
 
         int index = getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4);
-        
+
         index = index >= biomeCaches.length ? biomeCaches.length - 1 : index;
-        
+
         BiomeCache cache = this.biomeCaches[index];
         return cache != null ? cache
-                .getBiome( x, relY >> 4, z) : Minecraft.getMinecraft().world.getBiome(new BlockPos(x, y, z));
+                .getBiome(x, relY >> 4, z) : Minecraft.getMinecraft().world.getBiome(new BlockPos(x, y, z));
     }
 
     public ChunkSectionPos getOrigin() {
         return this.origin;
-    }
-
-    // [VanillaCopy] PalettedContainer#toIndex
-    public static int getLocalBlockIndex(int x, int y, int z) {
-        return y << 8 | z << 4 | x;
-    }
-
-    public static int getLocalSectionIndex(int x, int y, int z) {
-        return y << TABLE_BITS << TABLE_BITS | z << TABLE_BITS | x;
-    }
-
-    public static int getLocalChunkIndex(int x, int z) {
-        return z << TABLE_BITS | x;
     }
 }

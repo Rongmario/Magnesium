@@ -2,27 +2,22 @@ package me.jellysquid.mods.sodium.mixin.features.model;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.render.model.MultipartBakedModel;
-import net.minecraft.client.renderer.block.model.*;
-import net.minecraft.client.renderer.block.model.multipart.Multipart;
-import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.MultipartBakedModel;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Direction;
-import net.minecraftforge.client.model.data.IModelData;
-import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
-import java.util.function.Predicate;
 
 @Mixin(MultipartBakedModel.class)
 public class MixinMultipartBakedModel {

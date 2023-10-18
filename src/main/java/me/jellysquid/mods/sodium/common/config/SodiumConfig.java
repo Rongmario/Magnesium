@@ -1,9 +1,8 @@
 package me.jellysquid.mods.sodium.common.config;
 
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.io.*;
 import java.util.HashMap;
@@ -56,15 +55,72 @@ public class SodiumConfig {
         this.addMixinRule("features.texture_tracking", true);
         this.addMixinRule("features.world_ticking", true);
         this.addMixinRule("features.fast_biome_colors", true);
-        
-        if(FMLLoader.getLoadingModList().getModFileById("seamless_loading_screen") != null) { this.options.get("mixin.features.gui.fast_loading_screen").addModOverride(false, "seamless_loading_screen"); }
+
+        if (FMLLoader.getLoadingModList().getModFileById("seamless_loading_screen") != null) {
+            this.options.get("mixin.features.gui.fast_loading_screen").addModOverride(false, "seamless_loading_screen");
+        }
+    }
+
+    /**
+     * Loads the configuration file from the specified location. If it does not exist, a new configuration file will be
+     * created. The file on disk will then be updated to include any new options.
+     */
+    public static SodiumConfig load(File file) {
+        if (!file.exists()) {
+            try {
+                writeDefaultConfig(file);
+            } catch (IOException e) {
+                LOGGER.warn("Could not write default configuration file", e);
+            }
+
+            return new SodiumConfig();
+        }
+
+        Properties props = new Properties();
+
+        try (FileInputStream fin = new FileInputStream(file)) {
+            props.load(fin);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not load config file", e);
+        }
+
+        SodiumConfig config = new SodiumConfig();
+        config.readProperties(props);
+
+        return config;
+    }
+
+    private static void writeDefaultConfig(File file) throws IOException {
+        File dir = file.getParentFile();
+
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("Could not create parent directories");
+            }
+        } else if (!dir.isDirectory()) {
+            throw new IOException("The parent file is not a directory");
+        }
+
+        try (Writer writer = new FileWriter(file)) {
+            writer.write("# This is the configuration file for Sodium.\n");
+            writer.write("#\n");
+            writer.write("# You can find information on editing this file and all the available options here:\n");
+            writer.write("# https://github.com/jellysquid3/sodium-fabric/wiki/Configuration-File\n");
+            writer.write("#\n");
+            writer.write("# By default, this file will be empty except for this notice.\n");
+        }
+    }
+
+    private static String getMixinRuleName(String name) {
+        return "mixin." + name;
     }
 
     /**
      * Defines a Mixin rule which can be configured by users and other mods.
-     * @throws IllegalStateException If a rule with that name already exists
-     * @param mixin The name of the mixin package which will be controlled by this rule
+     *
+     * @param mixin   The name of the mixin package which will be controlled by this rule
      * @param enabled True if the rule will be enabled by default, otherwise false
+     * @throws IllegalStateException If a rule with that name already exists
      */
     private void addMixinRule(String mixin, boolean enabled) {
         String name = getMixinRuleName(mixin);
@@ -132,60 +188,6 @@ public class SodiumConfig {
         }
 
         return rule;
-    }
-
-    /**
-     * Loads the configuration file from the specified location. If it does not exist, a new configuration file will be
-     * created. The file on disk will then be updated to include any new options.
-     */
-    public static SodiumConfig load(File file) {
-        if (!file.exists()) {
-            try {
-                writeDefaultConfig(file);
-            } catch (IOException e) {
-                LOGGER.warn("Could not write default configuration file", e);
-            }
-
-            return new SodiumConfig();
-        }
-
-        Properties props = new Properties();
-
-        try (FileInputStream fin = new FileInputStream(file)){
-            props.load(fin);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not load config file", e);
-        }
-
-        SodiumConfig config = new SodiumConfig();
-        config.readProperties(props);
-
-        return config;
-    }
-
-    private static void writeDefaultConfig(File file) throws IOException {
-        File dir = file.getParentFile();
-
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                throw new IOException("Could not create parent directories");
-            }
-        } else if (!dir.isDirectory()) {
-            throw new IOException("The parent file is not a directory");
-        }
-
-        try (Writer writer = new FileWriter(file)) {
-            writer.write("# This is the configuration file for Sodium.\n");
-            writer.write("#\n");
-            writer.write("# You can find information on editing this file and all the available options here:\n");
-            writer.write("# https://github.com/jellysquid3/sodium-fabric/wiki/Configuration-File\n");
-            writer.write("#\n");
-            writer.write("# By default, this file will be empty except for this notice.\n");
-        }
-    }
-
-    private static String getMixinRuleName(String name) {
-        return "mixin." + name;
     }
 
     public int getOptionCount() {

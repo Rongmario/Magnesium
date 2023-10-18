@@ -1,24 +1,16 @@
 package me.jellysquid.mods.sodium.mixin.features.gui;
 
 import com.google.common.base.Strings;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.jellysquid.mods.sodium.compat.client.renderer.CompatRenderSystem;
 import me.jellysquid.mods.sodium.compat.lwjgl.CompatGL20C;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiOverlayDebug;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.gui.hud.DebugHud;
-import net.minecraft.client.render.*;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix4f;
 import org.apache.commons.lang3.Validate;
-import org.lwjgl.opengl.GL20C;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,18 +43,18 @@ public abstract class MixinDebugHud {
 
     @Inject(method = "renderDebugInfoLeft", at = @At("RETURN"))
     public void renderLeftText(CallbackInfo ci) {
-        this.renderCapturedText( false);
+        this.renderCapturedText(false);
     }
 
     @Inject(method = "renderDebugInfoRight", at = @At("RETURN"))
     public void renderRightText(ScaledResolution p_175239_1_, CallbackInfo ci) {
-        this.renderCapturedText( true);
+        this.renderCapturedText(true);
     }
 
-    private void renderCapturedText( boolean right) {
+    private void renderCapturedText(boolean right) {
         Validate.notNull(this.capturedList, "Failed to capture string list");
 
-        this.renderBackdrop( this.capturedList, right);
+        this.renderBackdrop(this.capturedList, right);
         this.renderStrings(this.capturedList, right);
 
         this.capturedList = null;
@@ -76,7 +68,7 @@ public abstract class MixinDebugHud {
                 int height = 9;
                 int width = this.fontRenderer.getStringWidth(string);
 
-                float x1 = right ? this.mc.displayWidth- 2 - width : 2;
+                float x1 = right ? this.mc.displayWidth - 2 - width : 2;
                 float y1 = 2 + (height * i);
 
                 this.fontRenderer.drawString(string, x1, y1, 0xe0e0e0, false);
@@ -84,7 +76,7 @@ public abstract class MixinDebugHud {
         }
     }
 
-    private void renderBackdrop( List<String> list, boolean right) {
+    private void renderBackdrop(List<String> list, boolean right) {
         CompatRenderSystem.enableBlend();
         CompatRenderSystem.disableTexture();
         CompatRenderSystem.defaultBlendFunc();
@@ -118,9 +110,9 @@ public abstract class MixinDebugHud {
             float x2 = x + width + 1;
             float y2 = y + height - 1;
 
-            bufferBuilder.pos( x1, y2, 0.0F).color(g, h, k, f).endVertex();
-            bufferBuilder.pos( x2, y2, 0.0F).color(g, h, k, f).endVertex();
-            bufferBuilder.pos( x2, y1, 0.0F).color(g, h, k, f).endVertex();
+            bufferBuilder.pos(x1, y2, 0.0F).color(g, h, k, f).endVertex();
+            bufferBuilder.pos(x2, y2, 0.0F).color(g, h, k, f).endVertex();
+            bufferBuilder.pos(x2, y1, 0.0F).color(g, h, k, f).endVertex();
             bufferBuilder.pos(x1, y1, 0.0F).color(g, h, k, f).endVertex();
         }
 

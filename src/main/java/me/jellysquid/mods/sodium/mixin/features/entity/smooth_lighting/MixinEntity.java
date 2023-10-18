@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.mixin.features.entity.smooth_lighting;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import me.jellysquid.mods.sodium.client.model.light.EntityLighter;
-import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.entity.EntityLightSampler;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +17,7 @@ public abstract class MixinEntity<T extends Entity> implements EntityLightSample
         // Use smooth entity lighting if enabled
 
         if (SodiumClientMod.options().quality.smoothLighting == SodiumGameOptions.LightingQuality.HIGH) {
-            cir.setReturnValue((float) EntityLighter.getBlendedLight(this, ((T) (Entity) (Object) this),0f));
+            cir.setReturnValue((float) EntityLighter.getBlendedLight(this, ((T) (Object) this), 0f));
         }
     }
 

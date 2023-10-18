@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.compat.util.math;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
@@ -57,7 +56,7 @@ public class ChunkSectionPos extends Vec3i {
         int i = getLocalCoord(pos.getX());
         int j = getLocalCoord(pos.getY());
         int k = getLocalCoord(pos.getZ());
-        return (short)(i << 8 | k << 4 | j << 0);
+        return (short) (i << 8 | k << 4 | j << 0);
     }
 
     public static int unpackLocalX(short packedLocalPos) {
@@ -70,6 +69,68 @@ public class ChunkSectionPos extends Vec3i {
 
     public static int unpackLocalZ(short packedLocalPos) {
         return packedLocalPos >>> 4 & 15;
+    }
+
+    public static int getBlockCoord(int sectionCoord) {
+        return sectionCoord << 4;
+    }
+
+    public static int unpackX(long packed) {
+        return (int) (packed << 0 >> 42);
+    }
+
+    public static int unpackY(long packed) {
+        return (int) (packed << 44 >> 44);
+    }
+
+    public static int unpackZ(long packed) {
+        return (int) (packed << 22 >> 42);
+    }
+
+    public static long fromBlockPos(long blockPos) {
+        BlockPos pos = BlockPos.fromLong(blockPos);
+        return asLong(getSectionCoord(pos.getX()), getSectionCoord(pos.getY()), getSectionCoord(pos.getZ()));
+    }
+
+    public static long withZeroY(long pos) {
+        return pos & -1048576L;
+    }
+
+    public static long asLong(int x, int y, int z) {
+        long l = 0L;
+        l |= ((long) x & 4194303L) << 42;
+        l |= ((long) y & 1048575L) << 0;
+        l |= ((long) z & 4194303L) << 20;
+        return l;
+    }
+
+    public static Stream<ChunkSectionPos> stream(ChunkSectionPos center, int radius) {
+        int j = center.getSectionX();
+        int k = center.getSectionY();
+        int l = center.getSectionZ();
+        return stream(j - radius, k - radius, l - radius, j + radius, k + radius, l + radius);
+    }
+
+    public static Stream<ChunkSectionPos> stream(ChunkPos center, int radius) {
+        int j = center.x;
+
+        int k = center.z;
+        return stream(j - radius, 0, k - radius, j + radius, 15, k + radius);
+    }
+
+    public static Stream<ChunkSectionPos> stream(final int minX, final int minY, final int minZ, final int maxX, final int maxY, final int maxZ) {
+        return StreamSupport.stream(new Spliterators.AbstractSpliterator<ChunkSectionPos>((long) (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1), 64) {
+            final CubeCoordinateIterator iterator = new CubeCoordinateIterator(minX, minY, minZ, maxX, maxY, maxZ);
+
+            public boolean tryAdvance(Consumer<? super ChunkSectionPos> consumer) {
+                if (this.iterator.advance()) {
+                    consumer.accept(new ChunkSectionPos(this.iterator.nextX(), this.iterator.nextY(), this.iterator.nextZ()));
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }, false);
     }
 
     public int unpackBlockX(short packedLocalPos) {
@@ -86,22 +147,6 @@ public class ChunkSectionPos extends Vec3i {
 
     public BlockPos unpackBlockPos(short packedLocalPos) {
         return new BlockPos(this.unpackBlockX(packedLocalPos), this.unpackBlockY(packedLocalPos), this.unpackBlockZ(packedLocalPos));
-    }
-
-    public static int getBlockCoord(int sectionCoord) {
-        return sectionCoord << 4;
-    }
-
-    public static int unpackX(long packed) {
-        return (int)(packed << 0 >> 42);
-    }
-
-    public static int unpackY(long packed) {
-        return (int)(packed << 44 >> 44);
-    }
-
-    public static int unpackZ(long packed) {
-        return (int)(packed << 22 >> 42);
     }
 
     public int getSectionX() {
@@ -140,15 +185,6 @@ public class ChunkSectionPos extends Vec3i {
         return (this.getSectionZ() << 4) + 15;
     }
 
-    public static long fromBlockPos(long blockPos) {
-        BlockPos pos = BlockPos.fromLong(blockPos);
-        return asLong(getSectionCoord(pos.getX()), getSectionCoord(pos.getY()), getSectionCoord(pos.getZ()));
-    }
-
-    public static long withZeroY(long pos) {
-        return pos & -1048576L;
-    }
-
     public BlockPos getMinPos() {
         return new BlockPos(getBlockCoord(this.getSectionX()), getBlockCoord(this.getSectionY()), getBlockCoord(this.getSectionZ()));
     }
@@ -161,48 +197,11 @@ public class ChunkSectionPos extends Vec3i {
         return new ChunkPos(this.getSectionX(), this.getSectionZ());
     }
 
-    public static long asLong(int x, int y, int z) {
-        long l = 0L;
-        l |= ((long)x & 4194303L) << 42;
-        l |= ((long)y & 1048575L) << 0;
-        l |= ((long)z & 4194303L) << 20;
-        return l;
-    }
-
     public long asLong() {
         return asLong(this.getSectionX(), this.getSectionY(), this.getSectionZ());
     }
 
     public Iterable<BlockPos> streamBlocks() {
         return BlockPos.getAllInBox(this.getMinX(), this.getMinY(), this.getMinZ(), this.getMaxX(), this.getMaxY(), this.getMaxZ());
-    }
-
-    public static Stream<ChunkSectionPos> stream(ChunkSectionPos center, int radius) {
-        int j = center.getSectionX();
-        int k = center.getSectionY();
-        int l = center.getSectionZ();
-        return stream(j - radius, k - radius, l - radius, j + radius, k + radius, l + radius);
-    }
-
-    public static Stream<ChunkSectionPos> stream(ChunkPos center, int radius) {
-        int j = center.x;
-
-        int k = center.z;
-        return stream(j - radius, 0, k - radius, j + radius, 15, k + radius);
-    }
-
-    public static Stream<ChunkSectionPos> stream(final int minX, final int minY, final int minZ, final int maxX, final int maxY, final int maxZ) {
-        return StreamSupport.stream(new Spliterators.AbstractSpliterator<ChunkSectionPos>((long)((maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1)), 64) {
-            final CubeCoordinateIterator iterator = new CubeCoordinateIterator(minX, minY, minZ, maxX, maxY, maxZ);
-
-            public boolean tryAdvance(Consumer<? super ChunkSectionPos> consumer) {
-                if (this.iterator.advance()) {
-                    consumer.accept(new ChunkSectionPos(this.iterator.nextX(), this.iterator.nextY(), this.iterator.nextZ()));
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }, false);
     }
 }

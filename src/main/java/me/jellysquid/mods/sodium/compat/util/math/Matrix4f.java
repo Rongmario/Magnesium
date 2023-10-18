@@ -71,11 +71,85 @@ public class Matrix4f {
         this.m12 = 2.0F * (f8 - f10);
     }
 
+    // Forge start
+    public Matrix4f(float[] values) {
+        m00 = values[0];
+        m01 = values[1];
+        m02 = values[2];
+        m03 = values[3];
+        m10 = values[4];
+        m11 = values[5];
+        m12 = values[6];
+        m13 = values[7];
+        m20 = values[8];
+        m21 = values[9];
+        m22 = values[10];
+        m23 = values[11];
+        m30 = values[12];
+        m31 = values[13];
+        m32 = values[14];
+        m33 = values[15];
+    }
+
+    @SideOnly(Side.CLIENT)
+    private static int bufferIndex(int p_226594_0_, int p_226594_1_) {
+        return p_226594_1_ * 4 + p_226594_0_;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static Matrix4f perspective(double p_195876_0_, float p_195876_2_, float p_195876_3_, float p_195876_4_) {
+        float f = (float) (1.0D / Math.tan(p_195876_0_ * (double) ((float) Math.PI / 180F) / 2.0D));
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.m00 = f / p_195876_2_;
+        matrix4f.m11 = f;
+        matrix4f.m22 = (p_195876_4_ + p_195876_3_) / (p_195876_3_ - p_195876_4_);
+        matrix4f.m32 = -1.0F;
+        matrix4f.m23 = 2.0F * p_195876_4_ * p_195876_3_ / (p_195876_3_ - p_195876_4_);
+        return matrix4f;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static Matrix4f orthographic(float p_195877_0_, float p_195877_1_, float p_195877_2_, float p_195877_3_) {
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.m00 = 2.0F / p_195877_0_;
+        matrix4f.m11 = 2.0F / p_195877_1_;
+        float f = p_195877_3_ - p_195877_2_;
+        matrix4f.m22 = -2.0F / f;
+        matrix4f.m33 = 1.0F;
+        matrix4f.m03 = -1.0F;
+        matrix4f.m13 = -1.0F;
+        matrix4f.m23 = -(p_195877_3_ + p_195877_2_) / f;
+        return matrix4f;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static Matrix4f createScaleMatrix(float p_226593_0_, float p_226593_1_, float p_226593_2_) {
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.m00 = p_226593_0_;
+        matrix4f.m11 = p_226593_1_;
+        matrix4f.m22 = p_226593_2_;
+        matrix4f.m33 = 1.0F;
+        return matrix4f;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static Matrix4f createTranslateMatrix(float p_226599_0_, float p_226599_1_, float p_226599_2_) {
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.m00 = 1.0F;
+        matrix4f.m11 = 1.0F;
+        matrix4f.m22 = 1.0F;
+        matrix4f.m33 = 1.0F;
+        matrix4f.m03 = p_226599_0_;
+        matrix4f.m13 = p_226599_1_;
+        matrix4f.m23 = p_226599_2_;
+        return matrix4f;
+    }
+
     public boolean equals(Object p_equals_1_) {
         if (this == p_equals_1_) {
             return true;
         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-            Matrix4f matrix4f = (Matrix4f)p_equals_1_;
+            Matrix4f matrix4f = (Matrix4f) p_equals_1_;
             return Float.compare(matrix4f.m00, this.m00) == 0 && Float.compare(matrix4f.m01, this.m01) == 0 && Float.compare(matrix4f.m02, this.m02) == 0 && Float.compare(matrix4f.m03, this.m03) == 0 && Float.compare(matrix4f.m10, this.m10) == 0 && Float.compare(matrix4f.m11, this.m11) == 0 && Float.compare(matrix4f.m12, this.m12) == 0 && Float.compare(matrix4f.m13, this.m13) == 0 && Float.compare(matrix4f.m20, this.m20) == 0 && Float.compare(matrix4f.m21, this.m21) == 0 && Float.compare(matrix4f.m22, this.m22) == 0 && Float.compare(matrix4f.m23, this.m23) == 0 && Float.compare(matrix4f.m30, this.m30) == 0 && Float.compare(matrix4f.m31, this.m31) == 0 && Float.compare(matrix4f.m32, this.m32) == 0 && Float.compare(matrix4f.m33, this.m33) == 0;
         } else {
             return false;
@@ -101,47 +175,41 @@ public class Matrix4f {
         return 31 * i + (this.m33 != 0.0F ? Float.floatToIntBits(this.m33) : 0);
     }
 
-    @SideOnly(Side.CLIENT)
-    private static int bufferIndex(int p_226594_0_, int p_226594_1_) {
-        return p_226594_1_ * 4 + p_226594_0_;
-    }
-
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append("Matrix4f:\n");
-        stringbuilder.append(this.m00);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m01);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m02);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m03);
-        stringbuilder.append("\n");
-        stringbuilder.append(this.m10);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m11);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m12);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m13);
-        stringbuilder.append("\n");
-        stringbuilder.append(this.m20);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m21);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m22);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m23);
-        stringbuilder.append("\n");
-        stringbuilder.append(this.m30);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m31);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m32);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m33);
-        stringbuilder.append("\n");
-        return stringbuilder.toString();
+        String stringbuilder = "Matrix4f:\n" +
+                this.m00 +
+                " " +
+                this.m01 +
+                " " +
+                this.m02 +
+                " " +
+                this.m03 +
+                "\n" +
+                this.m10 +
+                " " +
+                this.m11 +
+                " " +
+                this.m12 +
+                " " +
+                this.m13 +
+                "\n" +
+                this.m20 +
+                " " +
+                this.m21 +
+                " " +
+                this.m22 +
+                " " +
+                this.m23 +
+                "\n" +
+                this.m30 +
+                " " +
+                this.m31 +
+                " " +
+                this.m32 +
+                " " +
+                this.m33 +
+                "\n";
+        return stringbuilder;
     }
 
     @SideOnly(Side.CLIENT)
@@ -328,32 +396,6 @@ public class Matrix4f {
     }
 
     @SideOnly(Side.CLIENT)
-    public static Matrix4f perspective(double p_195876_0_, float p_195876_2_, float p_195876_3_, float p_195876_4_) {
-        float f = (float)(1.0D / Math.tan(p_195876_0_ * (double)((float)Math.PI / 180F) / 2.0D));
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.m00 = f / p_195876_2_;
-        matrix4f.m11 = f;
-        matrix4f.m22 = (p_195876_4_ + p_195876_3_) / (p_195876_3_ - p_195876_4_);
-        matrix4f.m32 = -1.0F;
-        matrix4f.m23 = 2.0F * p_195876_4_ * p_195876_3_ / (p_195876_3_ - p_195876_4_);
-        return matrix4f;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static Matrix4f orthographic(float p_195877_0_, float p_195877_1_, float p_195877_2_, float p_195877_3_) {
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.m00 = 2.0F / p_195877_0_;
-        matrix4f.m11 = 2.0F / p_195877_1_;
-        float f = p_195877_3_ - p_195877_2_;
-        matrix4f.m22 = -2.0F / f;
-        matrix4f.m33 = 1.0F;
-        matrix4f.m03 = -1.0F;
-        matrix4f.m13 = -1.0F;
-        matrix4f.m23 = -(p_195877_3_ + p_195877_2_) / f;
-        return matrix4f;
-    }
-
-    @SideOnly(Side.CLIENT)
     public void translate(Vector3d p_226597_1_) {
         this.m03 += p_226597_1_.x();
         this.m13 += p_226597_1_.y();
@@ -363,49 +405,6 @@ public class Matrix4f {
     @SideOnly(Side.CLIENT)
     public Matrix4f copy() {
         return new Matrix4f(this);
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static Matrix4f createScaleMatrix(float p_226593_0_, float p_226593_1_, float p_226593_2_) {
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.m00 = p_226593_0_;
-        matrix4f.m11 = p_226593_1_;
-        matrix4f.m22 = p_226593_2_;
-        matrix4f.m33 = 1.0F;
-        return matrix4f;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static Matrix4f createTranslateMatrix(float p_226599_0_, float p_226599_1_, float p_226599_2_) {
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.m00 = 1.0F;
-        matrix4f.m11 = 1.0F;
-        matrix4f.m22 = 1.0F;
-        matrix4f.m33 = 1.0F;
-        matrix4f.m03 = p_226599_0_;
-        matrix4f.m13 = p_226599_1_;
-        matrix4f.m23 = p_226599_2_;
-        return matrix4f;
-    }
-
-    // Forge start
-    public Matrix4f(float[] values) {
-        m00 = values[0];
-        m01 = values[1];
-        m02 = values[2];
-        m03 = values[3];
-        m10 = values[4];
-        m11 = values[5];
-        m12 = values[6];
-        m13 = values[7];
-        m20 = values[8];
-        m21 = values[9];
-        m22 = values[10];
-        m23 = values[11];
-        m30 = values[12];
-        m31 = values[13];
-        m32 = values[14];
-        m33 = values[15];
     }
 
     public void set(Matrix4f mat) {

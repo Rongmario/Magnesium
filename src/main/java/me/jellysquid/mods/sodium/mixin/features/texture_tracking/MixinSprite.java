@@ -1,45 +1,61 @@
 package me.jellysquid.mods.sodium.mixin.features.texture_tracking;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteExtended;
-import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
-import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.resources.data.AnimationMetadataSection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(Sprite.class)
+@Mixin(TextureAtlasSprite.class)
 public abstract class MixinSprite implements SpriteExtended {
     private boolean forceNextUpdate;
 
     @Shadow
-    private int frameTicks;
+    private int tickCounter;
 
     @Shadow
     @Final
-    private AnimationResourceMetadata animationMetadata;
+    private AnimationMetadataSection animationMetadata;
 
     @Shadow
-    private int frameIndex;
+    private int frameCounter;
     @Shadow
     @Final
-    private Sprite.Interpolation interpolation;
+    private int[][] interpolatedFrameData;
 
     @Shadow
     public abstract int getFrameCount();
 
+
     @Shadow
-    protected abstract void upload(int int_1);
+    public abstract int[][] getFrameTextureData(int index);
+
+    @Shadow
+    public abstract int getIconWidth();
+
+    @Shadow
+    public abstract int getIconHeight();
+
+    @Shadow
+    public abstract int getOriginX();
+
+    @Shadow
+    public abstract int getOriginY();
+
+    @Shadow
+    protected abstract void updateAnimationInterpolated();
 
     /**
      * @author JellySquid
      * @reason Allow conditional texture updating
      */
     @Overwrite
-    public void tickAnimation() {
-        this.frameTicks++;
+    public void updateAnimation() {
+        this.tickCounter++;
 
         boolean onDemand = SodiumClientMod.options().advanced.animateOnlyVisibleTextures;
 
@@ -49,24 +65,27 @@ public abstract class MixinSprite implements SpriteExtended {
     }
 
     private void uploadTexture() {
-        if (this.frameTicks >= this.animationMetadata.getFrameTime(this.frameIndex)) {
-            int prevFrameIndex = this.animationMetadata.getFrameIndex(this.frameIndex);
+        if (this.tickCounter >= this.animationMetadata.getFrameTime()) {
+            int prevFrameIndex = this.animationMetadata.getFrameIndex(this.frameCounter);
             int frameCount = this.animationMetadata.getFrameCount() == 0 ? this.getFrameCount() : this.animationMetadata.getFrameCount();
 
-            this.frameIndex = (this.frameIndex + 1) % frameCount;
-            this.frameTicks = 0;
+            this.frameCounter = (this.frameCounter + 1) % frameCount;
+            this.tickCounter = 0;
 
-            int frameIndex = this.animationMetadata.getFrameIndex(this.frameIndex);
+            int frameIndex = this.animationMetadata.getFrameIndex(this.frameCounter);
 
             if (prevFrameIndex != frameIndex && frameIndex >= 0 && frameIndex < this.getFrameCount()) {
-                this.upload(frameIndex);
+                TextureUtil.uploadTextureMipmap(getFrameTextureData(0), getIconWidth(), getIconHeight(), getOriginX(), getOriginY(), false, false);
             }
-        } else if (this.interpolation != null) {
+        } else if (this.interpolatedFrameData != null) {
+            this.updateInterpolatedTexture();
+            /*
             if (!RenderSystem.isOnRenderThread()) {
                 RenderSystem.recordRenderCall(this::updateInterpolatedTexture);
             } else {
-                this.updateInterpolatedTexture();
+
             }
+             */
         }
 
         this.forceNextUpdate = false;
@@ -78,6 +97,6 @@ public abstract class MixinSprite implements SpriteExtended {
     }
 
     private void updateInterpolatedTexture() {
-        this.interpolation.apply();
+        updateAnimationInterpolated();
     }
 }

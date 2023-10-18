@@ -26,14 +26,19 @@ public class Vector3f {
     }
 
     public Vector3f(Vector3d p_i51412_1_) {
-        this((float)p_i51412_1_.x, (float)p_i51412_1_.y, (float)p_i51412_1_.z);
+        this((float) p_i51412_1_.x, (float) p_i51412_1_.y, (float) p_i51412_1_.z);
+    }
+
+    // Forge start
+    public Vector3f(float[] values) {
+        set(values);
     }
 
     public boolean equals(Object p_equals_1_) {
         if (this == p_equals_1_) {
             return true;
         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-            Vector3f vector3f = (Vector3f)p_equals_1_;
+            Vector3f vector3f = (Vector3f) p_equals_1_;
             if (Float.compare(vector3f.x, this.x) != 0) {
                 return false;
             } else if (Float.compare(vector3f.y, this.y) != 0) {
@@ -120,7 +125,7 @@ public class Vector3f {
     @SideOnly(Side.CLIENT)
     public boolean normalize() {
         float f = this.x * this.x + this.y * this.y + this.z * this.z;
-        if ((double)f < 1.0E-5D) {
+        if ((double) f < 1.0E-5D) {
             return false;
         } else {
             float f1 = (float) MathHelper.fastInvSqrt(f);
@@ -197,16 +202,21 @@ public class Vector3f {
         return "[" + this.x + ", " + this.y + ", " + this.z + "]";
     }
 
-    // Forge start
-    public Vector3f(float[] values) {
-        set(values);
-    }
     public void set(float[] values) {
         this.x = values[0];
         this.y = values[1];
         this.z = values[2];
     }
-    public void setX(float x) { this.x = x; }
-    public void setY(float y) { this.y = y; }
-    public void setZ(float z) { this.z = z; }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
+    }
 }

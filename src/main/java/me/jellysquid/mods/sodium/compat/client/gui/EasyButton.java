@@ -9,10 +9,12 @@ public class EasyButton extends GuiButton {
 
     @NotNull
     private final Runnable action;
+
     public EasyButton(int buttonId, Dim2i dim2i, TextComponentTranslation buttonText, Runnable action) {
         super(buttonId, dim2i.getOriginX(), dim2i.getOriginY(), buttonText.getFormattedText());
         this.action = action;
     }
+
     public EasyButton(int buttonId, int x, int y, String buttonText, Runnable action) {
         super(buttonId, x, y, buttonText);
         this.action = action;

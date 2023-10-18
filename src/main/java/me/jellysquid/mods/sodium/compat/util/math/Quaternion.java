@@ -20,7 +20,7 @@ public class Quaternion {
 
     public Quaternion(Vector3f p_i48101_1_, float p_i48101_2_, boolean p_i48101_3_) {
         if (p_i48101_3_) {
-            p_i48101_2_ *= ((float)Math.PI / 180F);
+            p_i48101_2_ *= ((float) Math.PI / 180F);
         }
 
         float f = sin(p_i48101_2_ / 2.0F);
@@ -33,9 +33,9 @@ public class Quaternion {
     @SideOnly(Side.CLIENT)
     public Quaternion(float p_i48102_1_, float p_i48102_2_, float p_i48102_3_, boolean p_i48102_4_) {
         if (p_i48102_4_) {
-            p_i48102_1_ *= ((float)Math.PI / 180F);
-            p_i48102_2_ *= ((float)Math.PI / 180F);
-            p_i48102_3_ *= ((float)Math.PI / 180F);
+            p_i48102_1_ *= ((float) Math.PI / 180F);
+            p_i48102_2_ *= ((float) Math.PI / 180F);
+            p_i48102_3_ *= ((float) Math.PI / 180F);
         }
 
         float f = sin(0.5F * p_i48102_1_);
@@ -57,11 +57,19 @@ public class Quaternion {
         this.r = p_i48103_1_.r;
     }
 
+    private static float cos(float p_214904_0_) {
+        return (float) Math.cos(p_214904_0_);
+    }
+
+    private static float sin(float p_214903_0_) {
+        return (float) Math.sin(p_214903_0_);
+    }
+
     public boolean equals(Object p_equals_1_) {
         if (this == p_equals_1_) {
             return true;
         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-            Quaternion quaternion = (Quaternion)p_equals_1_;
+            Quaternion quaternion = (Quaternion) p_equals_1_;
             if (Float.compare(quaternion.i, this.i) != 0) {
                 return false;
             } else if (Float.compare(quaternion.j, this.j) != 0) {
@@ -84,12 +92,11 @@ public class Quaternion {
     }
 
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append("Quaternion[").append(this.r()).append(" + ");
-        stringbuilder.append(this.i()).append("i + ");
-        stringbuilder.append(this.j()).append("j + ");
-        stringbuilder.append(this.k()).append("k]");
-        return stringbuilder.toString();
+        String stringbuilder = "Quaternion[" + this.r() + " + " +
+                this.i() + "i + " +
+                this.j() + "j + " +
+                this.k() + "k]";
+        return stringbuilder;
     }
 
     public float i() {
@@ -143,14 +150,6 @@ public class Quaternion {
         this.j = p_227066_2_;
         this.k = p_227066_3_;
         this.r = p_227066_4_;
-    }
-
-    private static float cos(float p_214904_0_) {
-        return (float)Math.cos((double)p_214904_0_);
-    }
-
-    private static float sin(float p_214903_0_) {
-        return (float)Math.sin((double)p_214903_0_);
     }
 
     @SideOnly(Side.CLIENT)

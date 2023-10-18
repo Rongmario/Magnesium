@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.compat.client.renderer;
 
 import me.jellysquid.mods.sodium.compat.util.math.*;
-
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +29,7 @@ public interface IVertexBuilder extends IForgeVertexBuilder {
     void endVertex();
 
     default void vertex(float p_225588_1_, float p_225588_2_, float p_225588_3_, float p_225588_4_, float p_225588_5_, float p_225588_6_, float p_225588_7_, float p_225588_8_, float p_225588_9_, int p_225588_10_, int p_225588_11_, float p_225588_12_, float p_225588_13_, float p_225588_14_) {
-        this.vertex((double) p_225588_1_, (double) p_225588_2_, (double) p_225588_3_);
+        this.vertex(p_225588_1_, p_225588_2_, p_225588_3_);
         this.color(p_225588_4_, p_225588_5_, p_225588_6_, p_225588_7_);
         this.uv(p_225588_8_, p_225588_9_);
         this.overlayCoords(p_225588_10_);
@@ -52,15 +51,15 @@ public interface IVertexBuilder extends IForgeVertexBuilder {
     }
 
     default void putBulkData(BakedQuad p_227889_2_, float p_227889_3_, float p_227889_4_, float p_227889_5_, int p_227889_6_, int p_227889_7_) {
-        this.putBulkData( p_227889_2_, new float[]{1.0F, 1.0F, 1.0F, 1.0F}, p_227889_3_, p_227889_4_, p_227889_5_, new int[]{p_227889_6_, p_227889_6_, p_227889_6_, p_227889_6_}, p_227889_7_, false);
+        this.putBulkData(p_227889_2_, new float[]{1.0F, 1.0F, 1.0F, 1.0F}, p_227889_3_, p_227889_4_, p_227889_5_, new int[]{p_227889_6_, p_227889_6_, p_227889_6_, p_227889_6_}, p_227889_7_, false);
     }
 
-    default void putBulkData( BakedQuad p_227890_2_, float[] p_227890_3_, float p_227890_4_, float p_227890_5_, float p_227890_6_, int[] p_227890_7_, int p_227890_8_, boolean p_227890_9_) {
+    default void putBulkData(BakedQuad p_227890_2_, float[] p_227890_3_, float p_227890_4_, float p_227890_5_, float p_227890_6_, int[] p_227890_7_, int p_227890_8_, boolean p_227890_9_) {
         int[] aint = p_227890_2_.getVertexData();
         Vector3i vector3i = Direction.from(p_227890_2_.getFace()).getNormal();
         Vector3f vector3f = new Vector3f((float) vector3i.getX(), (float) vector3i.getY(), (float) vector3i.getZ());
-       // Matrix4f matrix4f = p_227890_1_.pose();
-       // vector3f.transform(p_227890_1_.normal());
+        // Matrix4f matrix4f = p_227890_1_.pose();
+        // vector3f.transform(p_227890_1_.normal());
         int i = 8;
         int j = aint.length / 8;
 
@@ -105,7 +104,7 @@ public interface IVertexBuilder extends IForgeVertexBuilder {
     default IVertexBuilder vertex(Matrix4f p_227888_1_, float p_227888_2_, float p_227888_3_, float p_227888_4_) {
         Vector4f vector4f = new Vector4f(p_227888_2_, p_227888_3_, p_227888_4_, 1.0F);
         vector4f.transform(p_227888_1_);
-        return this.vertex((double) vector4f.x(), (double) vector4f.y(), (double) vector4f.z());
+        return this.vertex(vector4f.x(), vector4f.y(), vector4f.z());
     }
 
     default IVertexBuilder normal(Matrix3f p_227887_1_, float p_227887_2_, float p_227887_3_, float p_227887_4_) {

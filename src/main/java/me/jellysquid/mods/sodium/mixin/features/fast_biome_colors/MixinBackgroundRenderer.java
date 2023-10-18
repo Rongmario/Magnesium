@@ -1,25 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.features.fast_biome_colors;
 
-import me.jellysquid.mods.sodium.client.util.color.FastCubicSampler;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.render.BackgroundRenderer;
-import net.minecraft.client.render.Camera;
 import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.CubicSampler;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraftforge.event.entity.EntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(EntityRenderer.class)
 public class MixinBackgroundRenderer<T extends Entity> {

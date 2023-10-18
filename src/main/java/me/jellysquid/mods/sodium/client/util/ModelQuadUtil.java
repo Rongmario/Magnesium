@@ -3,9 +3,7 @@ package me.jellysquid.mods.sodium.client.util;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.compat.util.math.Direction;
 import me.jellysquid.mods.sodium.compat.util.math.Vector3f;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 
 /**
  * Provides some utilities and constants for interacting with vanilla's model quad vertex format.

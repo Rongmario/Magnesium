@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.compat.util.math;
 
 public class Rect2i {
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private final int x;
+    private final int y;
+    private final int width;
+    private final int height;
 
     public Rect2i(int i, int j, int k, int l) {
         this.x = i;

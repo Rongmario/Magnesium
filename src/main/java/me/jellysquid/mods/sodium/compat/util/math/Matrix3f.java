@@ -7,10 +7,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Triple;
 
 public class Matrix3f {
-    private static final float G = 3.0F + 2.0F * (float)Math.sqrt(2.0D);
-    private static final float CS = (float)Math.cos((Math.PI / 8D));
-    private static final float SS = (float)Math.sin((Math.PI / 8D));
-    private static final float SQ2 = 1.0F / (float)Math.sqrt(2.0D);
+    private static final float G = 3.0F + 2.0F * (float) Math.sqrt(2.0D);
+    private static final float CS = (float) Math.cos((Math.PI / 8D));
+    private static final float SS = (float) Math.sin((Math.PI / 8D));
+    private static final float SQ2 = 1.0F / (float) Math.sqrt(2.0D);
     protected float m00;
     protected float m01;
     protected float m02;
@@ -49,15 +49,6 @@ public class Matrix3f {
         this.m12 = 2.0F * (f8 - f10);
     }
 
-    @SideOnly(Side.CLIENT)
-    public static Matrix3f createScaleMatrix(float p_226117_0_, float p_226117_1_, float p_226117_2_) {
-        Matrix3f matrix3f = new Matrix3f();
-        matrix3f.m00 = p_226117_0_;
-        matrix3f.m11 = p_226117_1_;
-        matrix3f.m22 = p_226117_2_;
-        return matrix3f;
-    }
-
     public Matrix3f(Matrix4f p_i225695_1_) {
         this.m00 = p_i225695_1_.m00;
         this.m01 = p_i225695_1_.m01;
@@ -83,6 +74,15 @@ public class Matrix3f {
     }
 
     @SideOnly(Side.CLIENT)
+    public static Matrix3f createScaleMatrix(float p_226117_0_, float p_226117_1_, float p_226117_2_) {
+        Matrix3f matrix3f = new Matrix3f();
+        matrix3f.m00 = p_226117_0_;
+        matrix3f.m11 = p_226117_1_;
+        matrix3f.m22 = p_226117_2_;
+        return matrix3f;
+    }
+
+    @SideOnly(Side.CLIENT)
     private static Pair<Float, Float> approxGivensQuat(float p_226113_0_, float p_226113_1_, float p_226113_2_) {
         float f = 2.0F * (p_226113_0_ - p_226113_2_);
         if (G * p_226113_1_ * p_226113_1_ < f * f) {
@@ -95,7 +95,7 @@ public class Matrix3f {
 
     @SideOnly(Side.CLIENT)
     private static Pair<Float, Float> qrGivensQuat(float p_226112_0_, float p_226112_1_) {
-        float f = (float)Math.hypot((double)p_226112_0_, (double)p_226112_1_);
+        float f = (float) Math.hypot(p_226112_0_, p_226112_1_);
         float f1 = f > 1.0E-6F ? p_226112_1_ : 0.0F;
         float f2 = Math.abs(p_226112_0_) + Math.max(f, 1.0E-6F);
         if (p_226112_0_ < 0.0F) {
@@ -201,7 +201,7 @@ public class Matrix3f {
         matrix3f.transpose();
         matrix3f.mul(this);
 
-        for(int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 5; ++i) {
             quaternion1.mul(stepJacobi(matrix3f));
         }
 
@@ -261,7 +261,7 @@ public class Matrix3f {
         f = f * f15;
         matrix3f3.mul(matrix3f2);
         f = 1.0F / f;
-        quaternion.mul((float)Math.sqrt((double)f));
+        quaternion.mul((float) Math.sqrt(f));
         Vector3d vector3f = new Vector3d(matrix3f3.m00 * f, matrix3f3.m11 * f, matrix3f3.m22 * f);
         return Triple.of(quaternion, vector3f, quaternion1);
     }
@@ -270,7 +270,7 @@ public class Matrix3f {
         if (this == p_equals_1_) {
             return true;
         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-            Matrix3f matrix3f = (Matrix3f)p_equals_1_;
+            Matrix3f matrix3f = (Matrix3f) p_equals_1_;
             return Float.compare(matrix3f.m00, this.m00) == 0 && Float.compare(matrix3f.m01, this.m01) == 0 && Float.compare(matrix3f.m02, this.m02) == 0 && Float.compare(matrix3f.m10, this.m10) == 0 && Float.compare(matrix3f.m11, this.m11) == 0 && Float.compare(matrix3f.m12, this.m12) == 0 && Float.compare(matrix3f.m20, this.m20) == 0 && Float.compare(matrix3f.m21, this.m21) == 0 && Float.compare(matrix3f.m22, this.m22) == 0;
         } else {
             return false;
@@ -303,27 +303,26 @@ public class Matrix3f {
     }
 
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder();
-        stringbuilder.append("Matrix3f:\n");
-        stringbuilder.append(this.m00);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m01);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m02);
-        stringbuilder.append("\n");
-        stringbuilder.append(this.m10);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m11);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m12);
-        stringbuilder.append("\n");
-        stringbuilder.append(this.m20);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m21);
-        stringbuilder.append(" ");
-        stringbuilder.append(this.m22);
-        stringbuilder.append("\n");
-        return stringbuilder.toString();
+        String stringbuilder = "Matrix3f:\n" +
+                this.m00 +
+                " " +
+                this.m01 +
+                " " +
+                this.m02 +
+                "\n" +
+                this.m10 +
+                " " +
+                this.m11 +
+                " " +
+                this.m12 +
+                "\n" +
+                this.m20 +
+                " " +
+                this.m21 +
+                " " +
+                this.m22 +
+                "\n";
+        return stringbuilder;
     }
 
     @SideOnly(Side.CLIENT)

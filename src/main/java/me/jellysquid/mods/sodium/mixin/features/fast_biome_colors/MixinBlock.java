@@ -3,10 +3,8 @@ package me.jellysquid.mods.sodium.mixin.features.fast_biome_colors;
 import me.jellysquid.mods.sodium.client.model.quad.blender.BlockColorSettings;
 import me.jellysquid.mods.sodium.client.model.quad.blender.DefaultBlockColorSettings;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.IBlockAccess;
 import org.spongepowered.asm.mixin.Mixin;
 

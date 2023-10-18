@@ -8,6 +8,13 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class TransformationMatrix {
+    private static final TransformationMatrix IDENTITY = Util.make(() -> {
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.setIdentity();
+        TransformationMatrix transformationmatrix = new TransformationMatrix(matrix4f);
+        transformationmatrix.getLeftRotation();
+        return transformationmatrix;
+    });
     private final Matrix4f matrix;
     private boolean decomposed;
     @Nullable
@@ -18,13 +25,7 @@ public class TransformationMatrix {
     private Vector3f scale;
     @Nullable
     private Quaternion rightRotation;
-    private static final TransformationMatrix IDENTITY = Util.make(() -> {
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.setIdentity();
-        TransformationMatrix transformationmatrix = new TransformationMatrix(matrix4f);
-        transformationmatrix.getLeftRotation();
-        return transformationmatrix;
-    });
+    private Matrix3f normalTransform = null;
 
     public TransformationMatrix(@Nullable Matrix4f p_i225915_1_) {
         if (p_i225915_1_ == null) {
@@ -46,35 +47,6 @@ public class TransformationMatrix {
 
     public static TransformationMatrix identity() {
         return IDENTITY;
-    }
-
-    public TransformationMatrix compose(TransformationMatrix p_227985_1_) {
-        Matrix4f matrix4f = this.getMatrix();
-        matrix4f.multiply(p_227985_1_.getMatrix());
-        return new TransformationMatrix(matrix4f);
-    }
-
-    @Nullable
-    public TransformationMatrix inverse() {
-        if (this == IDENTITY) {
-            return this;
-        } else {
-            Matrix4f matrix4f = this.getMatrix();
-            return matrix4f.invert() ? new TransformationMatrix(matrix4f) : null;
-        }
-    }
-
-    private void ensureDecomposed() {
-        if (!this.decomposed) {
-            Pair<Matrix3f, Vector3f> pair = toAffine(this.matrix);
-            Triple<Quaternion, Vector3d, Quaternion> triple = pair.getFirst().svdDecompose();
-            this.translation = pair.getSecond();
-            this.leftRotation = triple.getLeft();
-            this.scale = new Vector3f((float) triple.getMiddle().x, (float) triple.getMiddle().y, (float) triple.getMiddle().z);
-            this.rightRotation = triple.getRight();
-            this.decomposed = true;
-        }
-
     }
 
     private static Matrix4f compose(@Nullable Vector3f p_227986_0_, @Nullable Quaternion p_227986_1_, @Nullable Vector3f p_227986_2_, @Nullable Quaternion p_227986_3_) {
@@ -108,6 +80,35 @@ public class TransformationMatrix {
         return Pair.of(matrix3f, vector3f);
     }
 
+    public TransformationMatrix compose(TransformationMatrix p_227985_1_) {
+        Matrix4f matrix4f = this.getMatrix();
+        matrix4f.multiply(p_227985_1_.getMatrix());
+        return new TransformationMatrix(matrix4f);
+    }
+
+    @Nullable
+    public TransformationMatrix inverse() {
+        if (this == IDENTITY) {
+            return this;
+        } else {
+            Matrix4f matrix4f = this.getMatrix();
+            return matrix4f.invert() ? new TransformationMatrix(matrix4f) : null;
+        }
+    }
+
+    private void ensureDecomposed() {
+        if (!this.decomposed) {
+            Pair<Matrix3f, Vector3f> pair = toAffine(this.matrix);
+            Triple<Quaternion, Vector3d, Quaternion> triple = pair.getFirst().svdDecompose();
+            this.translation = pair.getSecond();
+            this.leftRotation = triple.getLeft();
+            this.scale = new Vector3f((float) triple.getMiddle().x, (float) triple.getMiddle().y, (float) triple.getMiddle().z);
+            this.rightRotation = triple.getRight();
+            this.decomposed = true;
+        }
+
+    }
+
     public Matrix4f getMatrix() {
         return this.matrix.copy();
     }
@@ -121,7 +122,7 @@ public class TransformationMatrix {
         if (this == p_equals_1_) {
             return true;
         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-            TransformationMatrix transformationmatrix = (TransformationMatrix)p_equals_1_;
+            TransformationMatrix transformationmatrix = (TransformationMatrix) p_equals_1_;
             return Objects.equals(this.matrix, transformationmatrix.matrix);
         } else {
             return false;
@@ -137,6 +138,7 @@ public class TransformationMatrix {
         ensureDecomposed();
         return translation.copy();
     }
+
     public Vector3f getScale() {
         ensureDecomposed();
         return scale.copy();
@@ -147,11 +149,11 @@ public class TransformationMatrix {
         return rightRotation.copy();
     }
 
-    private Matrix3f normalTransform = null;
     public Matrix3f getNormalMatrix() {
         checkNormalTransform();
         return normalTransform;
     }
+
     private void checkNormalTransform() {
         if (normalTransform == null) {
             normalTransform = new Matrix3f(matrix);

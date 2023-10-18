@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client.util;
 
 import me.jellysquid.mods.sodium.compat.util.math.Vector3f;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 
 /**

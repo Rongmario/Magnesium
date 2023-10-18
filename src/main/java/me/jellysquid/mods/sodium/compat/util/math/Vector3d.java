@@ -14,30 +14,6 @@ public class Vector3d {
     public final double y;
     public final double z;
 
-    @SideOnly(Side.CLIENT)
-    public static Vector3d fromRGB24(int p_237487_0_) {
-        double d0 = (double)(p_237487_0_ >> 16 & 255) / 255.0D;
-        double d1 = (double)(p_237487_0_ >> 8 & 255) / 255.0D;
-        double d2 = (double)(p_237487_0_ & 255) / 255.0D;
-        return new Vector3d(d0, d1, d2);
-    }
-
-    public static Vector3d atCenterOf(Vector3i p_237489_0_) {
-        return new Vector3d((double)p_237489_0_.getX() + 0.5D, (double)p_237489_0_.getY() + 0.5D, (double)p_237489_0_.getZ() + 0.5D);
-    }
-
-    public static Vector3d atLowerCornerOf(Vector3i p_237491_0_) {
-        return new Vector3d((double)p_237491_0_.getX(), (double)p_237491_0_.getY(), (double)p_237491_0_.getZ());
-    }
-
-    public static Vector3d atBottomCenterOf(Vector3i p_237492_0_) {
-        return new Vector3d((double)p_237492_0_.getX() + 0.5D, (double)p_237492_0_.getY(), (double)p_237492_0_.getZ() + 0.5D);
-    }
-
-    public static Vector3d upFromBottomCenterOf(Vector3i p_237490_0_, double p_237490_1_) {
-        return new Vector3d((double)p_237490_0_.getX() + 0.5D, (double)p_237490_0_.getY() + p_237490_1_, (double)p_237490_0_.getZ() + 0.5D);
-    }
-
     public Vector3d(double p_i47092_1_, double p_i47092_3_, double p_i47092_5_) {
         this.x = p_i47092_1_;
         this.y = p_i47092_3_;
@@ -45,10 +21,47 @@ public class Vector3d {
     }
 
     public Vector3d(Vector3d p_i225900_1_) {
-        this((double)p_i225900_1_.x(), (double)p_i225900_1_.y(), (double)p_i225900_1_.z());
+        this(p_i225900_1_.x(), p_i225900_1_.y(), p_i225900_1_.z());
     }
-    public Vector3d(Vec3d vec3d){
-        this(vec3d.x,vec3d.y,vec3d.z);
+
+    public Vector3d(Vec3d vec3d) {
+        this(vec3d.x, vec3d.y, vec3d.z);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static Vector3d fromRGB24(int p_237487_0_) {
+        double d0 = (double) (p_237487_0_ >> 16 & 255) / 255.0D;
+        double d1 = (double) (p_237487_0_ >> 8 & 255) / 255.0D;
+        double d2 = (double) (p_237487_0_ & 255) / 255.0D;
+        return new Vector3d(d0, d1, d2);
+    }
+
+    public static Vector3d atCenterOf(Vector3i p_237489_0_) {
+        return new Vector3d((double) p_237489_0_.getX() + 0.5D, (double) p_237489_0_.getY() + 0.5D, (double) p_237489_0_.getZ() + 0.5D);
+    }
+
+    public static Vector3d atLowerCornerOf(Vector3i p_237491_0_) {
+        return new Vector3d(p_237491_0_.getX(), p_237491_0_.getY(), p_237491_0_.getZ());
+    }
+
+    public static Vector3d atBottomCenterOf(Vector3i p_237492_0_) {
+        return new Vector3d((double) p_237492_0_.getX() + 0.5D, p_237492_0_.getY(), (double) p_237492_0_.getZ() + 0.5D);
+    }
+
+    public static Vector3d upFromBottomCenterOf(Vector3i p_237490_0_, double p_237490_1_) {
+        return new Vector3d((double) p_237490_0_.getX() + 0.5D, (double) p_237490_0_.getY() + p_237490_1_, (double) p_237490_0_.getZ() + 0.5D);
+    }
+
+    public static Vector3d directionFromRotation(Vector2f p_189984_0_) {
+        return directionFromRotation(p_189984_0_.x, p_189984_0_.y);
+    }
+
+    public static Vector3d directionFromRotation(float p_189986_0_, float p_189986_1_) {
+        float f = MathHelper.cos(-p_189986_1_ * ((float) Math.PI / 180F) - (float) Math.PI);
+        float f1 = MathHelper.sin(-p_189986_1_ * ((float) Math.PI / 180F) - (float) Math.PI);
+        float f2 = -MathHelper.cos(-p_189986_0_ * ((float) Math.PI / 180F));
+        float f3 = MathHelper.sin(-p_189986_0_ * ((float) Math.PI / 180F));
+        return new Vector3d(f1 * f2, f3, f * f2);
     }
 
     public Vector3d vectorTo(Vector3d p_72444_1_) {
@@ -56,7 +69,7 @@ public class Vector3d {
     }
 
     public Vector3d normalize() {
-        double d0 = (double) MathHelper.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        double d0 = MathHelper.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
         return d0 < 1.0E-4D ? ZERO : new Vector3d(this.x / d0, this.y / d0, this.z / d0);
     }
 
@@ -92,7 +105,7 @@ public class Vector3d {
         double d0 = p_72438_1_.x - this.x;
         double d1 = p_72438_1_.y - this.y;
         double d2 = p_72438_1_.z - this.z;
-        return (double)MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+        return MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
     }
 
     public double distanceToSqr(Vector3d p_72436_1_) {
@@ -120,15 +133,17 @@ public class Vector3d {
     public Vector3d multiply(Vector3d p_216369_1_) {
         return this.multiply(p_216369_1_.x, p_216369_1_.y, p_216369_1_.z);
     }
+
     public Vector3d multiply(double p_216369_1_) {
         return this.multiply(p_216369_1_, p_216369_1_, p_216369_1_);
     }
+
     public Vector3d multiply(double p_216372_1_, double p_216372_3_, double p_216372_5_) {
         return new Vector3d(this.x * p_216372_1_, this.y * p_216372_3_, this.z * p_216372_5_);
     }
 
     public double length() {
-        return (double)MathHelper.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        return MathHelper.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
 
     public double lengthSqr() {
@@ -141,7 +156,7 @@ public class Vector3d {
         } else if (!(p_equals_1_ instanceof Vector3d)) {
             return false;
         } else {
-            Vector3d vector3d = (Vector3d)p_equals_1_;
+            Vector3d vector3d = (Vector3d) p_equals_1_;
             if (Double.compare(vector3d.x, this.x) != 0) {
                 return false;
             } else if (Double.compare(vector3d.y, this.y) != 0) {
@@ -154,11 +169,11 @@ public class Vector3d {
 
     public int hashCode() {
         long j = Double.doubleToLongBits(this.x);
-        int i = (int)(j ^ j >>> 32);
+        int i = (int) (j ^ j >>> 32);
         j = Double.doubleToLongBits(this.y);
-        i = 31 * i + (int)(j ^ j >>> 32);
+        i = 31 * i + (int) (j ^ j >>> 32);
         j = Double.doubleToLongBits(this.z);
-        return 31 * i + (int)(j ^ j >>> 32);
+        return 31 * i + (int) (j ^ j >>> 32);
     }
 
     public String toString() {
@@ -169,17 +184,17 @@ public class Vector3d {
         float f = MathHelper.cos(p_178789_1_);
         float f1 = MathHelper.sin(p_178789_1_);
         double d0 = this.x;
-        double d1 = this.y * (double)f + this.z * (double)f1;
-        double d2 = this.z * (double)f - this.y * (double)f1;
+        double d1 = this.y * (double) f + this.z * (double) f1;
+        double d2 = this.z * (double) f - this.y * (double) f1;
         return new Vector3d(d0, d1, d2);
     }
 
     public Vector3d yRot(float p_178785_1_) {
         float f = MathHelper.cos(p_178785_1_);
         float f1 = MathHelper.sin(p_178785_1_);
-        double d0 = this.x * (double)f + this.z * (double)f1;
+        double d0 = this.x * (double) f + this.z * (double) f1;
         double d1 = this.y;
-        double d2 = this.z * (double)f - this.x * (double)f1;
+        double d2 = this.z * (double) f - this.x * (double) f1;
         return new Vector3d(d0, d1, d2);
     }
 
@@ -187,28 +202,16 @@ public class Vector3d {
     public Vector3d zRot(float p_242988_1_) {
         float f = MathHelper.cos(p_242988_1_);
         float f1 = MathHelper.sin(p_242988_1_);
-        double d0 = this.x * (double)f + this.y * (double)f1;
-        double d1 = this.y * (double)f - this.x * (double)f1;
+        double d0 = this.x * (double) f + this.y * (double) f1;
+        double d1 = this.y * (double) f - this.x * (double) f1;
         double d2 = this.z;
         return new Vector3d(d0, d1, d2);
     }
 
-    public static Vector3d directionFromRotation(Vector2f p_189984_0_) {
-        return directionFromRotation(p_189984_0_.x, p_189984_0_.y);
-    }
-
-    public static Vector3d directionFromRotation(float p_189986_0_, float p_189986_1_) {
-        float f = MathHelper.cos(-p_189986_1_ * ((float)Math.PI / 180F) - (float)Math.PI);
-        float f1 = MathHelper.sin(-p_189986_1_ * ((float)Math.PI / 180F) - (float)Math.PI);
-        float f2 = -MathHelper.cos(-p_189986_0_ * ((float)Math.PI / 180F));
-        float f3 = MathHelper.sin(-p_189986_0_ * ((float)Math.PI / 180F));
-        return new Vector3d((double)(f1 * f2), (double)f3, (double)(f * f2));
-    }
-
     public Vector3d align(EnumSet<Direction.Axis> p_197746_1_) {
-        double d0 = p_197746_1_.contains(Direction.Axis.X) ? (double)MathHelper.floor(this.x) : this.x;
-        double d1 = p_197746_1_.contains(Direction.Axis.Y) ? (double)MathHelper.floor(this.y) : this.y;
-        double d2 = p_197746_1_.contains(Direction.Axis.Z) ? (double)MathHelper.floor(this.z) : this.z;
+        double d0 = p_197746_1_.contains(Direction.Axis.X) ? (double) MathHelper.floor(this.x) : this.x;
+        double d1 = p_197746_1_.contains(Direction.Axis.Y) ? (double) MathHelper.floor(this.y) : this.y;
+        double d2 = p_197746_1_.contains(Direction.Axis.Z) ? (double) MathHelper.floor(this.z) : this.z;
         return new Vector3d(d0, d1, d2);
     }
 

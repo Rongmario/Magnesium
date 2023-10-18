@@ -26,7 +26,7 @@ public class Vector4f {
         if (this == p_equals_1_) {
             return true;
         } else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-            Vector4f vector4f = (Vector4f)p_equals_1_;
+            Vector4f vector4f = (Vector4f) p_equals_1_;
             if (Float.compare(vector4f.x, this.x) != 0) {
                 return false;
             } else if (Float.compare(vector4f.y, this.y) != 0) {
@@ -83,7 +83,7 @@ public class Vector4f {
 
     public boolean normalize() {
         float f = this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
-        if ((double)f < 1.0E-5D) {
+        if ((double) f < 1.0E-5D) {
             return false;
         } else {
             float f1 = (float) MathHelper.fastInvSqrt(f);
@@ -133,8 +133,20 @@ public class Vector4f {
         this.z = values[2];
         this.w = values[3];
     }
-    public void setX(float x) { this.x = x; }
-    public void setY(float y) { this.y = y; }
-    public void setZ(float z) { this.z = z; }
-    public void setW(float z) { this.w = z; }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
+    }
+
+    public void setW(float z) {
+        this.w = z;
+    }
 }

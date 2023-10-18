@@ -2,12 +2,13 @@ package me.jellysquid.mods.sodium.mixin.features.options;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.option.CloudRenderMode;
+import me.jellysquid.mods.sodium.compat.client.CompatCloudsRenderMode;
 import net.minecraft.client.settings.GameSettings;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(GameSettings.class)
 public class MixinGameOptions {
@@ -17,18 +18,33 @@ public class MixinGameOptions {
     @Shadow
     public boolean fancyGraphics;
 
-    /**
-     * @author JellySquid
-     * @reason Make the cloud render mode user-configurable
-     */
-    @Overwrite
-    public CloudRenderMode getCloudRenderMode() {
+    private void set(GameSettings instance) {
         SodiumGameOptions options = SodiumClientMod.options();
-        Minecraft.getMinecraft().gameSettings.
-        if (this.viewDistance < 4 || !options.quality.enableClouds) {
-            return CloudRenderMode.OFF;
+        if (this.renderDistanceChunks < 4 || !options.quality.enableClouds) {
+            instance.clouds = CompatCloudsRenderMode.OFF.getType();
+            return;
         }
-
-        return options.quality.cloudQuality.isFancy(this.graphicsMode) ? CloudRenderMode.FANCY : CloudRenderMode.FAST;
+        instance.clouds = options.quality.cloudQuality.isFancy(instance) ? CompatCloudsRenderMode.FANCY.getType() : CompatCloudsRenderMode.FAST.getType();
     }
+
+    @Redirect(method = "setOptionValue", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;clouds:I", opcode = Opcodes.PUTFIELD))
+    private void sustainCloudRenderMode(GameSettings instance, int value) {
+        set(instance);
+    }
+
+    @Redirect(method = "loadOptions", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;clouds:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
+    private void loadFromSodium_1(GameSettings instance, int value) {
+        set(instance);
+    }
+
+    @Redirect(method = "loadOptions", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;clouds:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void loadFromSodium_2(GameSettings instance, int value) {
+        set(instance);
+    }
+
+    @Redirect(method = "loadOptions", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;clouds:I", opcode = Opcodes.PUTFIELD, ordinal = 2))
+    private void loadFromSodium_3(GameSettings instance, int value) {
+        set(instance);
+    }
+
 }

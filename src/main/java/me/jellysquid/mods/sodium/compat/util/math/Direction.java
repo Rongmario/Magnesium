@@ -1,19 +1,14 @@
 package me.jellysquid.mods.sodium.compat.util.math;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.compat.util.Util;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
-
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -31,13 +26,6 @@ public enum Direction implements IStringSerializable {
     WEST(4, 5, 1, "west", Direction.AxisDirection.NEGATIVE, Direction.Axis.X, new Vector3i(-1, 0, 0)),
     EAST(5, 4, 3, "east", Direction.AxisDirection.POSITIVE, Direction.Axis.X, new Vector3i(1, 0, 0));
 
-    private final int data3d;
-    private final int oppositeIndex;
-    private final int data2d;
-    private final String name;
-    private final Direction.Axis axis;
-    private final Direction.AxisDirection axisDirection;
-    private final Vector3i normal;
     private static final Direction[] VALUES = values();
     private static final Map<String, Direction> BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Direction::getName, (p_199787_0_) -> {
         return p_199787_0_;
@@ -55,14 +43,21 @@ public enum Direction implements IStringSerializable {
         return new Direction[p_199791_0_];
     });
     private static final Long2ObjectMap<Direction> BY_NORMAL = Arrays.stream(VALUES).collect(Collectors.toMap((p_218385_0_) -> {
-        return (new BlockPos(p_218385_0_.getNormal().getX(),p_218385_0_.getNormal().getY(),p_218385_0_.getNormal().getZ())).toLong();
+        return (new BlockPos(p_218385_0_.getNormal().getX(), p_218385_0_.getNormal().getY(), p_218385_0_.getNormal().getZ())).toLong();
     }, (p_218384_0_) -> {
         return p_218384_0_;
     }, (p_218386_0_, p_218386_1_) -> {
         throw new IllegalArgumentException("Duplicate keys");
     }, Long2ObjectOpenHashMap::new));
+    private final int data3d;
+    private final int oppositeIndex;
+    private final int data2d;
+    private final String name;
+    private final Direction.Axis axis;
+    private final Direction.AxisDirection axisDirection;
+    private final Vector3i normal;
 
-    private Direction(int p_i46016_3_, int p_i46016_4_, int p_i46016_5_, String p_i46016_6_, Direction.AxisDirection p_i46016_7_, Direction.Axis p_i46016_8_, Vector3i p_i46016_9_) {
+    Direction(int p_i46016_3_, int p_i46016_4_, int p_i46016_5_, String p_i46016_6_, Direction.AxisDirection p_i46016_7_, Direction.Axis p_i46016_8_, Vector3i p_i46016_9_) {
         this.data3d = p_i46016_3_;
         this.data2d = p_i46016_5_;
         this.oppositeIndex = p_i46016_4_;
@@ -85,8 +80,8 @@ public enum Direction implements IStringSerializable {
         return getNearest(vector4f.x(), vector4f.y(), vector4f.z());
     }
 
-    public static Direction from(EnumFacing facing){
-        switch (facing){
+    public static Direction from(EnumFacing facing) {
+        switch (facing) {
             case DOWN:
                 return DOWN;
             case UP:
@@ -103,6 +98,75 @@ public enum Direction implements IStringSerializable {
                 return null;
         }
     }
+
+    @Nullable
+    public static Direction byName(@Nullable String p_176739_0_) {
+        return p_176739_0_ == null ? null : BY_NAME.get(p_176739_0_.toLowerCase(Locale.ROOT));
+    }
+
+    public static Direction from3DDataValue(int p_82600_0_) {
+        return BY_3D_DATA[MathHelper.abs(p_82600_0_ % BY_3D_DATA.length)];
+    }
+
+    public static Direction from2DDataValue(int p_176731_0_) {
+        return BY_2D_DATA[MathHelper.abs(p_176731_0_ % BY_2D_DATA.length)];
+    }
+
+    @Nullable
+    public static Direction fromNormal(int p_218383_0_, int p_218383_1_, int p_218383_2_) {
+
+        return BY_NORMAL.get(new BlockPos(p_218383_0_, p_218383_1_, p_218383_2_).toLong());
+    }
+
+    public static Direction fromYRot(double p_176733_0_) {
+        return from2DDataValue(MathHelper.floor(p_176733_0_ / 90.0D + 0.5D) & 3);
+    }
+
+    public static Direction fromAxisAndDirection(Direction.Axis p_211699_0_, Direction.AxisDirection p_211699_1_) {
+        switch (p_211699_0_) {
+            case X:
+                return p_211699_1_ == Direction.AxisDirection.POSITIVE ? EAST : WEST;
+            case Y:
+                return p_211699_1_ == Direction.AxisDirection.POSITIVE ? UP : DOWN;
+            case Z:
+            default:
+                return p_211699_1_ == Direction.AxisDirection.POSITIVE ? SOUTH : NORTH;
+        }
+    }
+
+    public static Direction getRandom(Random p_239631_0_) {
+        return Util.getRandom(VALUES, p_239631_0_);
+    }
+
+    public static Direction getNearest(double p_210769_0_, double p_210769_2_, double p_210769_4_) {
+        return getNearest((float) p_210769_0_, (float) p_210769_2_, (float) p_210769_4_);
+    }
+
+    public static Direction getNearest(float p_176737_0_, float p_176737_1_, float p_176737_2_) {
+        Direction direction = NORTH;
+        float f = Float.MIN_VALUE;
+
+        for (Direction direction1 : VALUES) {
+            float f1 = p_176737_0_ * (float) direction1.normal.getX() + p_176737_1_ * (float) direction1.normal.getY() + p_176737_2_ * (float) direction1.normal.getZ();
+            if (f1 > f) {
+                f = f1;
+                direction = direction1;
+            }
+        }
+
+        return direction;
+    }
+
+    public static Direction get(Direction.AxisDirection p_181076_0_, Direction.Axis p_181076_1_) {
+        for (Direction direction : VALUES) {
+            if (direction.getAxisDirection() == p_181076_0_ && direction.getAxis() == p_181076_1_) {
+                return direction;
+            }
+        }
+
+        throw new IllegalArgumentException("No such direction: " + p_181076_0_ + " " + p_181076_1_);
+    }
+
     @SideOnly(Side.CLIENT)
     public Quaternion getRotation() {
         Quaternion quaternion = Vector3f.XP.rotationDegrees(90.0F);
@@ -184,8 +248,8 @@ public enum Direction implements IStringSerializable {
         return this.normal.getZ();
     }
 
-    public EnumFacing to(){
-        switch (this){
+    public EnumFacing to() {
+        switch (this) {
             case UP:
                 return EnumFacing.UP;
             case DOWN:
@@ -215,66 +279,8 @@ public enum Direction implements IStringSerializable {
         return this.axis;
     }
 
-    @Nullable
-    public static Direction byName(@Nullable String p_176739_0_) {
-        return p_176739_0_ == null ? null : BY_NAME.get(p_176739_0_.toLowerCase(Locale.ROOT));
-    }
-
-    public static Direction from3DDataValue(int p_82600_0_) {
-        return BY_3D_DATA[MathHelper.abs(p_82600_0_ % BY_3D_DATA.length)];
-    }
-
-    public static Direction from2DDataValue(int p_176731_0_) {
-        return BY_2D_DATA[MathHelper.abs(p_176731_0_ % BY_2D_DATA.length)];
-    }
-
-    @Nullable
-    public static Direction fromNormal(int p_218383_0_, int p_218383_1_, int p_218383_2_) {
-
-        return BY_NORMAL.get(new BlockPos(p_218383_0_,p_218383_1_,p_218383_2_).toLong());
-    }
-
-    public static Direction fromYRot(double p_176733_0_) {
-        return from2DDataValue(MathHelper.floor(p_176733_0_ / 90.0D + 0.5D) & 3);
-    }
-
-    public static Direction fromAxisAndDirection(Direction.Axis p_211699_0_, Direction.AxisDirection p_211699_1_) {
-        switch (p_211699_0_) {
-            case X:
-                return p_211699_1_ == Direction.AxisDirection.POSITIVE ? EAST : WEST;
-            case Y:
-                return p_211699_1_ == Direction.AxisDirection.POSITIVE ? UP : DOWN;
-            case Z:
-            default:
-                return p_211699_1_ == Direction.AxisDirection.POSITIVE ? SOUTH : NORTH;
-        }
-    }
-
     public float toYRot() {
         return (float) ((this.data2d & 3) * 90);
-    }
-
-    public static Direction getRandom(Random p_239631_0_) {
-        return Util.getRandom(VALUES, p_239631_0_);
-    }
-
-    public static Direction getNearest(double p_210769_0_, double p_210769_2_, double p_210769_4_) {
-        return getNearest((float) p_210769_0_, (float) p_210769_2_, (float) p_210769_4_);
-    }
-
-    public static Direction getNearest(float p_176737_0_, float p_176737_1_, float p_176737_2_) {
-        Direction direction = NORTH;
-        float f = Float.MIN_VALUE;
-
-        for (Direction direction1 : VALUES) {
-            float f1 = p_176737_0_ * (float) direction1.normal.getX() + p_176737_1_ * (float) direction1.normal.getY() + p_176737_2_ * (float) direction1.normal.getZ();
-            if (f1 > f) {
-                f = f1;
-                direction = direction1;
-            }
-        }
-
-        return direction;
     }
 
     public String toString() {
@@ -283,16 +289,6 @@ public enum Direction implements IStringSerializable {
 
     public String getSerializedName() {
         return this.name;
-    }
-
-    public static Direction get(Direction.AxisDirection p_181076_0_, Direction.Axis p_181076_1_) {
-        for (Direction direction : VALUES) {
-            if (direction.getAxisDirection() == p_181076_0_ && direction.getAxis() == p_181076_1_) {
-                return direction;
-            }
-        }
-
-        throw new IllegalArgumentException("No such direction: " + p_181076_0_ + " " + p_181076_1_);
     }
 
     public Vector3i getNormal() {
@@ -306,7 +302,7 @@ public enum Direction implements IStringSerializable {
         return (float) this.normal.getX() * f1 + (float) this.normal.getZ() * f2 > 0.0F;
     }
 
-    public static enum Axis implements IStringSerializable, java.util.function.Predicate<Direction> {
+    public enum Axis implements IStringSerializable, java.util.function.Predicate<Direction> {
         X("x") {
             public int choose(int p_196052_1_, int p_196052_2_, int p_196052_3_) {
                 return p_196052_1_;
@@ -336,19 +332,23 @@ public enum Direction implements IStringSerializable {
         };
 
         private static final Direction.Axis[] VALUES = values();
-        public static final Codec<Axis> CODEC = me.jellysquid.mods.sodium.compat.util.IStringSerializable.fromEnum(Direction.Axis::values, Direction.Axis::byName);
         private static final Map<String, Direction.Axis> BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Direction.Axis::getName, (p_199785_0_) -> {
             return p_199785_0_;
         }));
+        public static final Codec<Axis> CODEC = me.jellysquid.mods.sodium.compat.util.IStringSerializable.fromEnum(Direction.Axis::values, Direction.Axis::byName);
         private final String name;
 
-        private Axis(String p_i49394_3_) {
+        Axis(String p_i49394_3_) {
             this.name = p_i49394_3_;
         }
 
         @Nullable
         public static Direction.Axis byName(String p_176717_0_) {
             return BY_NAME.get(p_176717_0_.toLowerCase(Locale.ROOT));
+        }
+
+        public static Direction.Axis getRandom(Random p_239634_0_) {
+            return Util.getRandom(VALUES, p_239634_0_);
         }
 
         public String getName() {
@@ -365,10 +365,6 @@ public enum Direction implements IStringSerializable {
 
         public String toString() {
             return this.name;
-        }
-
-        public static Direction.Axis getRandom(Random p_239634_0_) {
-            return Util.getRandom(VALUES, p_239634_0_);
         }
 
         public boolean test(@Nullable Direction p_test_1_) {
@@ -396,14 +392,14 @@ public enum Direction implements IStringSerializable {
         public abstract double choose(double p_196051_1_, double p_196051_3_, double p_196051_5_);
     }
 
-    public static enum AxisDirection {
+    public enum AxisDirection {
         POSITIVE(1, "Towards positive"),
         NEGATIVE(-1, "Towards negative");
 
         private final int step;
         private final String name;
 
-        private AxisDirection(int p_i46014_3_, String p_i46014_4_) {
+        AxisDirection(int p_i46014_3_, String p_i46014_4_) {
             this.step = p_i46014_3_;
             this.name = p_i46014_4_;
         }
@@ -421,14 +417,14 @@ public enum Direction implements IStringSerializable {
         }
     }
 
-    public static enum Plane implements Iterable<Direction>, Predicate<Direction> {
+    public enum Plane implements Iterable<Direction>, Predicate<Direction> {
         HORIZONTAL(new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}, new Direction.Axis[]{Direction.Axis.X, Direction.Axis.Z}),
         VERTICAL(new Direction[]{Direction.UP, Direction.DOWN}, new Direction.Axis[]{Direction.Axis.Y});
 
         private final Direction[] faces;
         private final Direction.Axis[] axis;
 
-        private Plane(Direction[] p_i49393_3_, Direction.Axis[] p_i49393_4_) {
+        Plane(Direction[] p_i49393_3_, Direction.Axis[] p_i49393_4_) {
             this.faces = p_i49393_3_;
             this.axis = p_i49393_4_;
         }

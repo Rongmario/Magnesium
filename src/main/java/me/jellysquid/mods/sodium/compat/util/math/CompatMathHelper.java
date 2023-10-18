@@ -8,6 +8,7 @@ public final class CompatMathHelper {
     public static double lerp(double p_219803_0_, double p_219803_2_, double p_219803_4_) {
         return p_219803_2_ + p_219803_0_ * (p_219803_4_ - p_219803_2_);
     }
+
     public static boolean approximatelyEquals(float a, float b) {
         return Math.abs(b - a) < 1.0E-5F;
     }

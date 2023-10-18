@@ -111,7 +111,7 @@ public abstract class LightDataAccess {
             em = true;
         }
 
-        boolean op = state.isTopSolid() || state.getLightOpacity(world, pos) == 0;
+        boolean op = state.isTranslucent() || state.getLightOpacity(world, pos) == 0;
         boolean fo = state.isOpaqueCube();
         boolean fc = state.isFullCube();
 

@@ -6,6 +6,7 @@ package me.jellysquid.mods.sodium.client.world;
 public interface ChunkStatusListener {
     /**
      * Called after a chunk is added to the world and loaded.
+     *
      * @param x The x-coordinate of the loaded chunk
      * @param z The z-coordinate of the loaded chunk
      */
@@ -13,6 +14,7 @@ public interface ChunkStatusListener {
 
     /**
      * Called after a chunk is removed from the world and unloaded.
+     *
      * @param x The x-coordiante of the unloaded chunk
      * @param z The z-coordinate of the unloaded chunk
      */

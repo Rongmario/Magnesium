@@ -40,7 +40,7 @@ public class Vector3i {
         } else if (!(p_equals_1_ instanceof Vector3i)) {
             return false;
         } else {
-            Vector3i vector3i = (Vector3i)p_equals_1_;
+            Vector3i vector3i = (Vector3i) p_equals_1_;
             if (this.getX() != vector3i.getX()) {
                 return false;
             } else if (this.getY() != vector3i.getY()) {
@@ -67,20 +67,20 @@ public class Vector3i {
         return this.x;
     }
 
-    public int getY() {
-        return this.y;
-    }
-
-    public int getZ() {
-        return this.z;
-    }
-
     protected void setX(int p_223471_1_) {
         this.x = p_223471_1_;
     }
 
+    public int getY() {
+        return this.y;
+    }
+
     protected void setY(int p_185336_1_) {
         this.y = p_185336_1_;
+    }
+
+    public int getZ() {
+        return this.z;
     }
 
     protected void setZ(int p_223472_1_) {
@@ -112,7 +112,7 @@ public class Vector3i {
     }
 
     public boolean closerThan(Vector3i p_218141_1_, double p_218141_2_) {
-        return this.distSqr((double)p_218141_1_.getX(), (double)p_218141_1_.getY(), (double)p_218141_1_.getZ(), false) < p_218141_2_ * p_218141_2_;
+        return this.distSqr(p_218141_1_.getX(), p_218141_1_.getY(), p_218141_1_.getZ(), false) < p_218141_2_ * p_218141_2_;
     }
 
     public boolean closerThan(IPosition p_218137_1_, double p_218137_2_) {
@@ -120,7 +120,7 @@ public class Vector3i {
     }
 
     public double distSqr(Vector3i p_177951_1_) {
-        return this.distSqr((double)p_177951_1_.getX(), (double)p_177951_1_.getY(), (double)p_177951_1_.getZ(), true);
+        return this.distSqr(p_177951_1_.getX(), p_177951_1_.getY(), p_177951_1_.getZ(), true);
     }
 
     public double distSqr(IPosition p_218138_1_, boolean p_218138_2_) {
@@ -129,17 +129,17 @@ public class Vector3i {
 
     public double distSqr(double p_218140_1_, double p_218140_3_, double p_218140_5_, boolean p_218140_7_) {
         double d0 = p_218140_7_ ? 0.5D : 0.0D;
-        double d1 = (double)this.getX() + d0 - p_218140_1_;
-        double d2 = (double)this.getY() + d0 - p_218140_3_;
-        double d3 = (double)this.getZ() + d0 - p_218140_5_;
+        double d1 = (double) this.getX() + d0 - p_218140_1_;
+        double d2 = (double) this.getY() + d0 - p_218140_3_;
+        double d3 = (double) this.getZ() + d0 - p_218140_5_;
         return d1 * d1 + d2 * d2 + d3 * d3;
     }
 
     public int distManhattan(Vector3i p_218139_1_) {
-        float f = (float)Math.abs(p_218139_1_.getX() - this.getX());
-        float f1 = (float)Math.abs(p_218139_1_.getY() - this.getY());
-        float f2 = (float)Math.abs(p_218139_1_.getZ() - this.getZ());
-        return (int)(f + f1 + f2);
+        float f = (float) Math.abs(p_218139_1_.getX() - this.getX());
+        float f1 = (float) Math.abs(p_218139_1_.getY() - this.getY());
+        float f2 = (float) Math.abs(p_218139_1_.getZ() - this.getZ());
+        return (int) (f + f1 + f2);
     }
 
     public String toString() {
@@ -148,6 +148,6 @@ public class Vector3i {
 
     @SideOnly(Side.CLIENT)
     public String toShortString() {
-        return "" + this.getX() + ", " + this.getY() + ", " + this.getZ();
+        return this.getX() + ", " + this.getY() + ", " + this.getZ();
     }
 }
